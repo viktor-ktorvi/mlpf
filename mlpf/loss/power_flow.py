@@ -5,9 +5,6 @@ from torch_scatter import scatter_sum
 from typing import Callable, Tuple
 
 
-# TODO unittest first on pypower then on pandapower
-#  make sure the loss is dead 0 for float64 tensors and acceptably low for float32
-
 def power_flow_errors(edge_index: Tensor,
                       active_powers: Tensor,
                       reactive_powers: Tensor,

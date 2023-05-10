@@ -1,0 +1,9 @@
+data_path: generated_ppcs
+table: bus
+columns:
+  - 2
+  - 3
+  - 7
+  - 8
+
+node: null

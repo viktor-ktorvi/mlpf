@@ -25,8 +25,8 @@ def extract_values(ppc: Dict, dtype: torch.dtype = torch.float32) -> Tuple[LongT
     reactive_powers_pu = np.imag(complex_power)
 
     # extract voltages and angles
-    voltages_pu = ppc['bus'][:, BusTableIds.voltage_magnitude]
-    angles_deg = ppc['bus'][:, BusTableIds.voltage_angle]
+    voltages_pu = ppc['bus'][:, BusTableIds.voltage_magnitude_pu]
+    angles_deg = ppc['bus'][:, BusTableIds.voltage_angle_deg]
 
     # extract edges
     Y_sparse_matrix, _, _ = makeYbus(ppc['baseMVA'], ppc['bus'], ppc['branch'])

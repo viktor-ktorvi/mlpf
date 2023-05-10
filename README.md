@@ -12,6 +12,12 @@ pip install -r requirements.txt
 
 ```
 
+## Modify requirements
+
+```
+pip3 freeze > requirements.txt
+```
+
 ## Generate docs
 
 ```
@@ -52,6 +58,7 @@ html_theme = 'sphinx_rtd_theme'
 ```
 
 Generate the html file:
+
 ```
 .\make.bat html
 ```

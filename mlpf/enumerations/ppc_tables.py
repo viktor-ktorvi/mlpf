@@ -8,6 +8,10 @@ from mlpf.enumerations.generator_table import GeneratorTableIds
 
 
 class PPCTables(Enum):
+    """
+    Enumeration for all the PPC fields/tables.
+    """
+    BaseMVA = "baseMVA"
     Branch = "branch"
     Bus = "bus"
     Generator = "gen"

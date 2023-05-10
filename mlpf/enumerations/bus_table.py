@@ -7,10 +7,13 @@ class BusTableIds(IntEnum):
     """
     bus_number = 0
     bus_type = 1
-    active_power = 2  # MW
-    reactive_power = 3  # MVar
-    voltage_magnitude = 7  # p.u.
-    voltage_angle = 8  # degree
-    base_kV = 9  # kV
-    voltage_max = 11  # p.u.
-    voltage_min = 12  # p.u.
+    active_power_MW = 2
+    reactive_power_MVAr = 3
+    shunt_conductance = 4
+    shunt_susceptance = 5
+    area_number = 6
+    voltage_magnitude_pu = 7
+    voltage_angle_deg = 8
+    base_kV = 9
+    voltage_max_pu = 11
+    voltage_min_pu = 12

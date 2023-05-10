@@ -5,6 +5,7 @@ from torch_scatter import scatter_sum
 from typing import Callable, Tuple
 
 
+# TODO make numpy version for sklearn
 def power_flow_errors(edge_index: Tensor,
                       active_powers: Tensor,
                       reactive_powers: Tensor,

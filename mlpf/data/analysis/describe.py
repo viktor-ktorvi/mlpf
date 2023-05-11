@@ -59,9 +59,18 @@ def describe_ppc(ppc_list: List[Dict], table: PPCTables, columns: List[IntEnum] 
 
 @hydra.main(version_base=None, config_path="configs", config_name="default")
 def main(cfg):
+    """
+    Load the dataset and describe it. Use the hydra config default or overwrite the command line args.
+
+    :param cfg: hydra config
+    :return:
+    """
     data_list = load_data(cfg.data_path)
 
     table = PPCTables(cfg.table)
+
+    print("Node:", "all" if cfg.node is None else str(cfg.node))
+
     if cfg.columns is None:
         columns = None
     else:
@@ -74,6 +83,7 @@ def main(cfg):
     description = describe_ppc(data_list, table=table, columns=columns, node_id=cfg.node)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
+
     print(description)
 
 

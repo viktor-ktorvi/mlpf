@@ -1,13 +1,12 @@
 import hydra
 import warnings
 
-import numpy as np
 import pandas as pd
 
 from pandas import DataFrame
 from typing import Dict, List, Union
 
-from mlpf.data.analysis.utils import generate_description, ppc_extract_bus_type
+from mlpf.data.analysis.utils import generate_description, ppc_list_extract_bus_type
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
@@ -31,17 +30,7 @@ def describe_grid(ppc_list: List[Dict],
     :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
     """
 
-    data_list = []
-    for ppc in ppc_list:
-
-        if bus_type is None:
-            data_sample = ppc[table.value]
-        else:
-            data_sample = ppc_extract_bus_type(ppc, table, bus_type)
-
-        data_list.append(data_sample)
-
-    dataset = np.vstack(data_list)
+    dataset = ppc_list_extract_bus_type(ppc_list, table, bus_type)
 
     return generate_description(dataset, table, columns)
 

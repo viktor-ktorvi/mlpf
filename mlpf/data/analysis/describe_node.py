@@ -1,17 +1,15 @@
 import hydra
 import warnings
 
-import numpy as np
 import pandas as pd
 
 from pandas import DataFrame
 from typing import Dict, List, Union
 
-from mlpf.data.analysis.utils import ppc_extract_node, generate_description
+from mlpf.data.analysis.utils import generate_description, ppc_list_extract_node
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
-from mlpf.enumerations.bus_type import BusTypeIds
 from mlpf.enumerations.gencost_table import GeneratorCostTableIds
 from mlpf.enumerations.generator_table import GeneratorTableIds
 from mlpf.enumerations.ppc_tables import get_table_ids, PPCTables
@@ -21,13 +19,17 @@ def describe_node(ppc_list: List[Dict],
                   table: PPCTables,
                   node_number: int,
                   columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None) -> DataFrame:
-    data_list = []
-    for ppc in ppc_list:
-        data_sample = ppc_extract_node(ppc, table=table, node_number=node_number)
-        data_list.append(data_sample)
+    """
+    Return a description DataFrame similar to pandas' _describe_ function.
 
-    dataset = np.vstack(data_list)
+    :param ppc_list: List of pypower case files
+    :param table: PPCTables object specifying which table to describe.
+    :param node_number: The bus number in the bus table of the node to describe.
+    :param columns: List of table id enums specifying which columns to describe.
+    :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
+    """
 
+    dataset = ppc_list_extract_node(ppc_list, table, node_number)
     return generate_description(dataset, table, columns)
 
 

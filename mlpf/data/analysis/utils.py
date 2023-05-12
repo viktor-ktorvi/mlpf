@@ -40,6 +40,28 @@ def ppc_extract_bus_type(ppc: Dict, table: PPCTables, bus_type: BusTypeIds) -> n
     return data_sample
 
 
+def ppc_list_extract_bus_type(ppc_list: List[Dict], table: PPCTables, bus_type: BusTypeIds = None) -> ndarray:
+    """
+    Extract an ndarray of the specified table for every ppc in a list and merge them to one ndarray, but only with the buses of the specified bus_type.
+
+    :param ppc_list: List of pypower case files.
+    :param table: PPCTables enum object.
+    :param bus_type: BusTypeIds enum object.
+    :return: ndarray of the specified table with only the buses of the specified type.
+    """
+    data_list = []
+    for ppc in ppc_list:
+
+        if bus_type is None:
+            data_sample = ppc[table.value]
+        else:
+            data_sample = ppc_extract_bus_type(ppc, table, bus_type)
+
+        data_list.append(data_sample)
+
+    return np.vstack(data_list)
+
+
 def ppc_extract_node(ppc: Dict, table: PPCTables, node_number: int) -> ndarray:
     """
     Extract the ndarray of the specified table from a ppc for the specified node.
@@ -64,18 +86,34 @@ def ppc_extract_node(ppc: Dict, table: PPCTables, node_number: int) -> ndarray:
     return data_sample
 
 
-def generate_description(dataset: ndarray,
-                         table: PPCTables,
-                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None) -> DataFrame:
+def ppc_list_extract_node(ppc_list: List[Dict], table: PPCTables, node_number: int) -> ndarray:
     """
-    Generate the description DataFrame from the given dataset array, table and column.
+    Extract an ndarray of the specified table for every ppc in a list, for the specified node.
 
-    :param dataset: ndarray with the data to be described.
+    :param ppc_list: List of pypower case files.
+    :param table: PPCTables enum object.
+    :param node_number: The bus table number of the node of interest.
+    :return: ndarray of the specified table with only the specified node.
+    """
+    data_list = []
+    for ppc in ppc_list:
+        data_sample = ppc_extract_node(ppc, table=table, node_number=node_number)
+        data_list.append(data_sample)
+
+    return np.vstack(data_list)
+
+
+def generate_data_frame(dataset: ndarray,
+                        table: PPCTables,
+                        columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None) -> DataFrame:
+    """
+    Generate a DataFrame from the given dataset array, table and column.
+
+    :param dataset: ndarray with the data to be collected.
     :param table: PPCTables object.
-    :param columns: List of table id enums specifying which columns to describe.
-    :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
+    :param columns: List of table id enums specifying which columns to collect.
+    :return: DataFrame object containing the columns of the dataset.
     """
-
     table_ids_enum = get_table_ids(table)
 
     # extract column names; set index as name if name isn't defined
@@ -94,7 +132,21 @@ def generate_description(dataset: ndarray,
     else:
         column_ids = [i for i in range(dataset.shape[1])]
 
-    data_frame = DataFrame(data=dataset[:, column_ids], columns=column_names)
+    return DataFrame(data=dataset[:, column_ids], columns=column_names)
+
+
+def generate_description(dataset: ndarray,
+                         table: PPCTables,
+                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None) -> DataFrame:
+    """
+    Generate the description DataFrame from the given dataset array, table and column.
+
+    :param dataset: ndarray with the data to be described.
+    :param table: PPCTables object.
+    :param columns: List of table id enums specifying which columns to describe.
+    :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
+    """
+    data_frame = generate_data_frame(dataset, table, columns)
     description = data_frame.describe()
 
     return description

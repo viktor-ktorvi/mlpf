@@ -1,5 +1,18 @@
 bus_type: null
-columns: null
+
+columns:
+  - 2
+  - 3
+  - 7
+  - 8
+  - 9
+
 data_path: generated_ppcs
+
 table: bus
+
 node_number: 0
+
+defaults:
+  - visualization: default
+  - _self_ # https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/

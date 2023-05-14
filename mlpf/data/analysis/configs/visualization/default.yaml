@@ -1,0 +1,2 @@
+bandwidth_coeff: 0.05
+kernel: cosine

@@ -22,7 +22,7 @@ def describe_node(ppc_list: List[Dict],
     """
     Return a description DataFrame similar to pandas' _describe_ function.
 
-    :param ppc_list: List of pypower case files
+    :param ppc_list: List of pypower case files.
     :param table: PPCTables object specifying which table to describe.
     :param node_number: The bus number in the bus table of the node to describe.
     :param columns: List of table id enums specifying which columns to describe.

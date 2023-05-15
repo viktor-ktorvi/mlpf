@@ -3,7 +3,7 @@ import hydra
 from typing import Dict, List, Union
 from matplotlib import pyplot as plt
 
-from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_node
+from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_node, table_and_columns_from_config, create_subplots_grid
 from mlpf.data.analysis.visualization.visualize import visualize_pdf_data_frame
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
@@ -14,10 +14,12 @@ from mlpf.enumerations.ppc_tables import get_table_ids, PPCTables
 
 
 # TODO test for crashes on all grids
-def visualize_node_pdf(ppc_list: List[Dict], table: PPCTables,
-                       node_number: int = 0,
-                       columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None, kernel: str = "tophat", bandwidth_coeff: float = 0.05,
-                       axes=None):
+def visualize_node_pdfs(ppc_list: List[Dict],
+                        table: PPCTables,
+                        node_number: int = 0,
+                        columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
+                        kernel: str = "tophat", bandwidth_coeff: float = 0.05,
+                        axes=None):
     """
     Estimate and plot the probability density function of each specified column for the specified node and table in the ppc list. If no axes list is provided
     new figures will be created.
@@ -41,30 +43,43 @@ def visualize_node_pdf(ppc_list: List[Dict], table: PPCTables,
     visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes)
 
 
+def visualize_node_histograms(ppc_list: List[Dict],
+                              table: PPCTables,
+                              node_number: int = 0,
+                              columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None):
+    """
+    Estimate and plot the histogram of each specified column for the specified node and table in the ppc list.
+
+    :param ppc_list: List of pypower case files.
+    :param table: PPCTables object specifying which table to describe.
+    :param node_number: The bus number in the bus table of the node to describe.
+    :param columns: List of table id enums specifying which columns to describe.
+    be one supported by this function.
+    :return:
+    """
+
+    dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
+    data_frame = generate_data_frame(dataset, table, columns)
+
+    data_frame.hist()
+
+
 @hydra.main(version_base=None, config_path="../configs", config_name="default")
 def main(cfg):
     data_list = load_data(cfg.data_path)
 
-    table = PPCTables(cfg.table)
+    table, columns = table_and_columns_from_config(cfg)
 
-    if cfg.columns is None:
-        columns = None
-    else:
-        table_ids_enum = get_table_ids(table)
-        columns = [table_ids_enum(i) for i in cfg.columns]
-
-    if len(columns) % 2 == 0:
-        fig, axes = plt.subplots(2, len(columns) // 2)
-    else:
-        fig, axes = plt.subplots(2, len(columns) // 2 + 1)
-        fig.delaxes(axes.flatten()[-1])
+    fig, axes = create_subplots_grid(len(columns))
 
     fig.tight_layout()
-    visualize_node_pdf(data_list, table, node_number=cfg.node_number, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
-                       axes=axes)
+    visualize_node_pdfs(data_list, table, node_number=cfg.node_number, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
+                        axes=axes)
 
     for ax in axes.flatten():
         ax.set_ylim(bottom=0)
+
+    visualize_node_histograms(data_list, table, node_number=cfg.node_number, columns=columns)
 
     plt.show()
 

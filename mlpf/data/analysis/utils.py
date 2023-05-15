@@ -2,7 +2,9 @@ import numpy as np
 
 from numpy import ndarray
 from pandas import DataFrame
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple, Type
+
+from matplotlib import pyplot as plt
 
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
@@ -150,3 +152,41 @@ def generate_description(dataset: ndarray,
     description = data_frame.describe()
 
     return description
+
+
+def table_and_columns_from_config(cfg) -> Tuple[PPCTables, Union[List[Type[BusTableIds | BranchTableIds | GeneratorTableIds | GeneratorCostTableIds]], None]]:
+    """
+    Extract the table and column objects using the given config.
+
+    :param cfg: Hydra config.
+    :return: PPCTables
+    """
+    table = PPCTables(cfg.table)
+
+    if cfg.columns is None:
+        columns = None
+    else:
+        table_ids_enum = get_table_ids(table)
+        columns = [table_ids_enum(i) for i in cfg.columns]
+
+    return table, columns
+
+
+def create_subplots_grid(num_axes: int):
+    """
+    Create a (2, len(columns)) subplot.
+
+    :param num_axes: number of axes in total
+    :return: figure and axes array
+    """
+
+    assert num_axes > 0
+
+    # TODO this could be generalized to numbers that aren't 2
+    if num_axes % 2 == 0:
+        fig, axes = plt.subplots(2, num_axes // 2)
+    else:
+        fig, axes = plt.subplots(2, num_axes // 2 + 1)
+        fig.delaxes(axes.flatten()[-1])
+
+    return fig, axes

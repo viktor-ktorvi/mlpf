@@ -46,7 +46,8 @@ def visualize_node_pdfs(ppc_list: List[Dict],
 def visualize_node_histograms(ppc_list: List[Dict],
                               table: PPCTables,
                               node_number: int = 0,
-                              columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None):
+                              columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
+                              bins: int = 10):
     """
     Estimate and plot the histogram of each specified column for the specified node and table in the ppc list.
 
@@ -55,13 +56,14 @@ def visualize_node_histograms(ppc_list: List[Dict],
     :param node_number: The bus number in the bus table of the node to describe.
     :param columns: List of table id enums specifying which columns to describe.
     be one supported by this function.
+    :param bins: How many bins to work with.
     :return:
     """
 
     dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
     data_frame = generate_data_frame(dataset, table, columns)
 
-    data_frame.hist()
+    data_frame.hist(bins=bins)
 
 
 @hydra.main(version_base=None, config_path="../configs", config_name="default")
@@ -79,7 +81,7 @@ def main(cfg):
     for ax in axes.flatten():
         ax.set_ylim(bottom=0)
 
-    visualize_node_histograms(data_list, table, node_number=cfg.node_number, columns=columns)
+    visualize_node_histograms(data_list, table, node_number=cfg.node_number, columns=columns, bins=20)
 
     plt.show()
 

@@ -64,7 +64,7 @@ def ppc_list_extract_bus_type(ppc_list: List[Dict], table: PPCTables, bus_type: 
     return np.vstack(data_list)
 
 
-def ppc_extract_node(ppc: Dict, table: PPCTables, node_numbers: List[int]) -> ndarray:
+def ppc_extract_nodes(ppc: Dict, table: PPCTables, node_numbers: List[int]) -> ndarray:
     """
     Extract the ndarray of the specified table from a ppc for the specified nodes.
 
@@ -88,7 +88,7 @@ def ppc_extract_node(ppc: Dict, table: PPCTables, node_numbers: List[int]) -> nd
     return data_sample
 
 
-def ppc_list_extract_node(ppc_list: List[Dict], table: PPCTables, node_numbers: List[int]) -> ndarray:
+def ppc_list_extract_nodes(ppc_list: List[Dict], table: PPCTables, node_numbers: List[int]) -> ndarray:
     """
     Extract an ndarray of the specified table for every ppc in a list, for the specified nodes.
 
@@ -99,7 +99,7 @@ def ppc_list_extract_node(ppc_list: List[Dict], table: PPCTables, node_numbers: 
     """
     data_list = []
     for ppc in ppc_list:
-        data_sample = ppc_extract_node(ppc, table=table, node_numbers=node_numbers)
+        data_sample = ppc_extract_nodes(ppc, table=table, node_numbers=node_numbers)
         data_list.append(data_sample)
 
     return np.vstack(data_list)

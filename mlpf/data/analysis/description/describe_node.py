@@ -6,7 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 from typing import Dict, List, Union
 
-from mlpf.data.analysis.utils import ppc_list_extract_node
+from mlpf.data.analysis.utils import ppc_list_extract_nodes
 from mlpf.data.analysis.description.describe import generate_description
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
@@ -30,7 +30,7 @@ def describe_nodes(ppc_list: List[Dict],
     :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_numbers)
+    dataset = ppc_list_extract_nodes(ppc_list, table, node_numbers)
     return generate_description(dataset, table, columns)
 
 

@@ -64,22 +64,22 @@ def ppc_list_extract_bus_type(ppc_list: List[Dict], table: PPCTables, bus_type: 
     return np.vstack(data_list)
 
 
-def ppc_extract_node(ppc: Dict, table: PPCTables, node_number: int) -> ndarray:
+def ppc_extract_node(ppc: Dict, table: PPCTables, node_numbers: List[int]) -> ndarray:
     """
-    Extract the ndarray of the specified table from a ppc for the specified node.
+    Extract the ndarray of the specified table from a ppc for the specified nodes.
 
     :param ppc: Pypower case file.
     :param table: PPCTables enum object.
-    :param node_number: The bus table number of the node of interest.
+    :param node_numbers: The bus table numbers of the nodes of interest.
     :return: ndarray of the specified table with only the specified node.
     """
     data_sample = ppc[table.value]
 
     if table == PPCTables.Generator:
-        data_sample = data_sample[ppc["gen"][:, GeneratorTableIds.bus_number] == node_number]
+        data_sample = data_sample[np.isin(ppc["gen"][:, GeneratorTableIds.bus_number], node_numbers)]
 
     elif table == PPCTables.Bus:
-        data_sample = data_sample[node_number]
+        data_sample = data_sample[node_numbers]
 
     else:
         # TODO support gencost
@@ -88,18 +88,18 @@ def ppc_extract_node(ppc: Dict, table: PPCTables, node_number: int) -> ndarray:
     return data_sample
 
 
-def ppc_list_extract_node(ppc_list: List[Dict], table: PPCTables, node_number: int) -> ndarray:
+def ppc_list_extract_node(ppc_list: List[Dict], table: PPCTables, node_numbers: List[int]) -> ndarray:
     """
-    Extract an ndarray of the specified table for every ppc in a list, for the specified node.
+    Extract an ndarray of the specified table for every ppc in a list, for the specified nodes.
 
     :param ppc_list: List of pypower case files.
     :param table: PPCTables enum object.
-    :param node_number: The bus table number of the node of interest.
+    :param node_numbers: The bus table numbers of the nodes of interest.
     :return: ndarray of the specified table with only the specified node.
     """
     data_list = []
     for ppc in ppc_list:
-        data_sample = ppc_extract_node(ppc, table=table, node_number=node_number)
+        data_sample = ppc_extract_node(ppc, table=table, node_numbers=node_numbers)
         data_list.append(data_sample)
 
     return np.vstack(data_list)
@@ -135,23 +135,6 @@ def generate_data_frame(dataset: ndarray,
         column_ids = [i for i in range(dataset.shape[1])]
 
     return DataFrame(data=dataset[:, column_ids], columns=column_names)
-
-
-def generate_description(dataset: ndarray,
-                         table: PPCTables,
-                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None) -> DataFrame:
-    """
-    Generate the description DataFrame from the given dataset array, table and column.
-
-    :param dataset: ndarray with the data to be described.
-    :param table: PPCTables object.
-    :param columns: List of table id enums specifying which columns to describe.
-    :return: DataFrame object containing the description. To view the stats summary print the description DataFrame.
-    """
-    data_frame = generate_data_frame(dataset, table, columns)
-    description = data_frame.describe()
-
-    return description
 
 
 def table_and_columns_from_config(cfg) -> Tuple[PPCTables, Union[List[Type[BusTableIds | BranchTableIds | GeneratorTableIds | GeneratorCostTableIds]], None]]:

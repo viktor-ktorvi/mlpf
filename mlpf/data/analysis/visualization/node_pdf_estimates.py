@@ -18,7 +18,7 @@ from mlpf.enumerations.ppc_tables import PPCTables
 # TODO test for crashes on all grids
 def visualize_node_pdfs(ppc_list: List[Dict],
                         table: PPCTables,
-                        node_number: int = 0,
+                        node_numbers: List[int],
                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
                         kernel: str = "tophat", bandwidth_coeff: float = 0.05,
                         axes: ndarray[Axes] = None):
@@ -28,7 +28,7 @@ def visualize_node_pdfs(ppc_list: List[Dict],
 
     :param ppc_list: List of pypower case files.
     :param table: PPCTables object specifying which table to describe.
-    :param node_number: The bus number in the bus table of the node to describe.
+    :param node_numbers: The bus number in the bus table of the node to describe.
     :param columns: List of table id enums specifying which columns to describe.
     :param kernel: Name of kernel method to use. The function calls sklearn.neighbors.KernelDensity so it must
     be one supported by this function.
@@ -39,7 +39,7 @@ def visualize_node_pdfs(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
+    dataset = ppc_list_extract_node(ppc_list, table, node_numbers=node_numbers)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes)
@@ -47,7 +47,7 @@ def visualize_node_pdfs(ppc_list: List[Dict],
 
 def visualize_node_histograms(ppc_list: List[Dict],
                               table: PPCTables,
-                              node_number: int = 0,
+                              node_numbers: List[int],
                               columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
                               bins: int = 10,
                               axes: ndarray[Axes] = None):
@@ -56,7 +56,7 @@ def visualize_node_histograms(ppc_list: List[Dict],
 
     :param ppc_list: List of pypower case files.
     :param table: PPCTables object specifying which table to describe.
-    :param node_number: The bus number in the bus table of the node to describe.
+    :param node_numbers: The bus number in the bus table of the node to describe.
     :param columns: List of table id enums specifying which columns to describe.
     be one supported by this function.
     :param bins: How many bins to work with.
@@ -64,7 +64,7 @@ def visualize_node_histograms(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
+    dataset = ppc_list_extract_node(ppc_list, table, node_numbers=node_numbers)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_histogram_data_frame(data_frame, bins, axes)
@@ -79,7 +79,7 @@ def main(cfg):
     fig, axes = create_subplots_grid(len(columns))
 
     fig.tight_layout()
-    visualize_node_pdfs(data_list, table, node_number=cfg.node_number, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
+    visualize_node_pdfs(data_list, table, node_numbers=cfg.node_numbers, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
                         axes=axes)
 
     for ax in axes.flatten():
@@ -88,7 +88,7 @@ def main(cfg):
     fig, axes = create_subplots_grid(len(columns))
     fig.tight_layout()
 
-    visualize_node_histograms(data_list, table, node_number=cfg.node_number, columns=columns, bins=cfg.visualization.bins, axes=axes)
+    visualize_node_histograms(data_list, table, node_numbers=cfg.node_numbers, columns=columns, bins=cfg.visualization.bins, axes=axes)
 
     plt.show()
 

@@ -11,7 +11,10 @@ data_path: generated_ppcs
 
 table: bus
 
-node_number: 0
+node_numbers:
+  - 0
+  - 1
+  - 2
 
 defaults:
   - visualization: default

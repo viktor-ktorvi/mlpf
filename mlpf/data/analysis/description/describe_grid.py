@@ -6,7 +6,8 @@ import pandas as pd
 from pandas import DataFrame
 from typing import Dict, List, Union
 
-from mlpf.data.analysis.utils import generate_description, ppc_list_extract_bus_type
+from mlpf.data.analysis.utils import ppc_list_extract_bus_type
+from mlpf.data.analysis.description.describe import generate_description
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
@@ -35,7 +36,7 @@ def describe_grid(ppc_list: List[Dict],
     return generate_description(dataset, table, columns)
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="default")
+@hydra.main(version_base=None, config_path="../configs", config_name="default")
 def main(cfg):
     """
     Load the dataset and describe it. Use the hydra config default or overwrite the command line args.

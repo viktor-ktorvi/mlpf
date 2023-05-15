@@ -112,11 +112,10 @@ def plot_pdf(x_values: ndarray,
         pdf_estimate = np.exp(kde.score_samples(x_values))
 
         # where there are large gaps in the pdf insert a NaN so as not to connect lines across a large gap
-        pdf_estimate[large_difference_mask] = np.nan  # TODO don't replace, just add to the right
+        pdf_estimate[large_difference_mask] = np.nan
 
-        ax.plot(x_values, pdf_estimate)
+        ax.fill_between(x_values.flatten(), pdf_estimate, alpha=0.5)
 
     else:
         # when there aren't a lot of unique values it makes sense to just do a histogram/bar plot
-
-        ax.hist(x_values)
+        ax.hist(x_values, alpha=0.5, align='left')

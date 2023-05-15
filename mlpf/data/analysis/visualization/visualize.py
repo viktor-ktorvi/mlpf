@@ -12,7 +12,8 @@ def visualize_pdf_data_frame(data_frame: DataFrame,
                              kernel: str = "tophat",
                              bandwidth_coeff: float = 0.05,
                              axes: ndarray[Axes] = None,
-                             max_samples: int = 2500):
+                             max_samples: int = 2500,
+                             relative_gap_tolerance: float = 0.03):
     """
     Estimate and plot the probability density function of each column of the given dataframe. If no axes list is provided
     new figures will be created.
@@ -27,6 +28,7 @@ def visualize_pdf_data_frame(data_frame: DataFrame,
     :param max_samples: Since estimating the pdf could take a lot of time for a large number of samples, _max_samples_ provides a
     limit on the number of samples to take into consideration. If the number of samples is larger than _max_samples_ then approximately
     _max_samples_ samples are randomly sampled.
+    :param relative_gap_tolerance: How large(relatively compared to the entire width) can the gaps in the pdf be before the line crossing them is cut.
     :return:
     """
     for i, column in enumerate(data_frame):
@@ -38,7 +40,7 @@ def visualize_pdf_data_frame(data_frame: DataFrame,
 
         x_values = data_frame[column]
 
-        plot_pdf(x_values, ax, max_samples, kernel, bandwidth_coeff)
+        plot_pdf(x_values, ax, max_samples, kernel, bandwidth_coeff, relative_gap_tolerance)
 
         ax.set_title(column)
         ax.set_xlabel(column)
@@ -75,7 +77,8 @@ def plot_pdf(x_values: ndarray,
              ax: Axes,
              max_samples: int = 2500,
              kernel: str = "tophat",
-             bandwidth_coeff: float = 0.05):
+             bandwidth_coeff: float = 0.05,
+             relative_gap_tolerance: float = 0.03):
     """
     Estimate and plot the probability density function of the given array.
 
@@ -88,6 +91,7 @@ def plot_pdf(x_values: ndarray,
     :param max_samples: Since estimating the pdf could take a lot of time for a large number of samples, _max_samples_ provides a
     limit on the number of samples to take into consideration. If the number of samples is larger than _max_samples_ then approximately
     _max_samples_ samples are randomly sampled.
+    :param relative_gap_tolerance: How large(relatively compared to the entire width) can the gaps in the pdf be before the line crossing them is cut
     :return:
     """
 
@@ -99,12 +103,20 @@ def plot_pdf(x_values: ndarray,
 
     total_width = np.max(x_values) - np.min(x_values)
 
-    if total_width > 0.0:
+    # find large gaps in the pdf
+    differences = np.diff(x_values, axis=0, append=0)
+    large_difference_mask = (differences > total_width * relative_gap_tolerance).flatten()
+
+    if len(np.unique(x_values)) > 100:
         kde = KernelDensity(kernel=kernel, bandwidth=bandwidth_coeff * total_width).fit(x_values)
         pdf_estimate = np.exp(kde.score_samples(x_values))
+
+        # where there are large gaps in the pdf insert a NaN so as not to connect lines across a large gap
+        pdf_estimate[large_difference_mask] = np.nan  # TODO don't replace, just add to the right
 
         ax.plot(x_values, pdf_estimate)
 
     else:
-        # if the values are all the same value it makes sense to just do a histogram/bar plot
+        # when there aren't a lot of unique values it makes sense to just do a histogram/bar plot
+
         ax.hist(x_values)

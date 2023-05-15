@@ -1,2 +1,3 @@
 bandwidth_coeff: 0.05
+bins: 100
 kernel: cosine

@@ -1,34 +1,36 @@
 import hydra
 
 from typing import Dict, List, Union
-from matplotlib.axes import Axes
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 from numpy import ndarray
 
-from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_node, table_and_columns_from_config, create_subplots_grid
+from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_bus_type, table_and_columns_from_config, create_subplots_grid
 from mlpf.data.analysis.visualization.visualize import visualize_pdf_data_frame, visualize_histogram_data_frame
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
+from mlpf.enumerations.bus_type import BusTypeIds
 from mlpf.enumerations.gencost_table import GeneratorCostTableIds
 from mlpf.enumerations.generator_table import GeneratorTableIds
 from mlpf.enumerations.ppc_tables import PPCTables
 
 
 # TODO test for crashes on all grids
-def visualize_node_pdfs(ppc_list: List[Dict],
+def visualize_grid_pdfs(ppc_list: List[Dict],
                         table: PPCTables,
-                        node_number: int = 0,
+                        bus_type: BusTypeIds = None,
                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
-                        kernel: str = "tophat", bandwidth_coeff: float = 0.05,
-                        axes: ndarray[Axes] = None):
+                        kernel: str = "tophat",
+                        bandwidth_coeff: float = 0.05,
+                        axes=None):
     """
-    Estimate and plot the probability density function of each specified column for the specified node and table in the ppc list. If no axes list is provided
+    Estimate and plot the probability density function of each specified column for the specified bus type and table in the ppc list. If no axes list is provided
     new figures will be created.
 
     :param ppc_list: List of pypower case files.
     :param table: PPCTables object specifying which table to describe.
-    :param node_number: The bus number in the bus table of the node to describe.
+    :param bus_type: Bus type to consider.
     :param columns: List of table id enums specifying which columns to describe.
     :param kernel: Name of kernel method to use. The function calls sklearn.neighbors.KernelDensity so it must
     be one supported by this function.
@@ -39,24 +41,24 @@ def visualize_node_pdfs(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
+    dataset = ppc_list_extract_bus_type(ppc_list, table, bus_type)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes)
 
 
-def visualize_node_histograms(ppc_list: List[Dict],
+def visualize_grid_histograms(ppc_list: List[Dict],
                               table: PPCTables,
-                              node_number: int = 0,
+                              bus_type: BusTypeIds = None,
                               columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
                               bins: int = 10,
                               axes: ndarray[Axes] = None):
     """
-    Estimate and plot the histogram of each specified column for the specified node and table in the ppc list.
+    Estimate and plot the histogram of each specified column for the specified bus type and table in the ppc list.
 
     :param ppc_list: List of pypower case files.
     :param table: PPCTables object specifying which table to describe.
-    :param node_number: The bus number in the bus table of the node to describe.
+    :param bus_type: Bus type to consider.
     :param columns: List of table id enums specifying which columns to describe.
     be one supported by this function.
     :param bins: How many bins to work with.
@@ -64,7 +66,7 @@ def visualize_node_histograms(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_number=node_number)
+    dataset = ppc_list_extract_bus_type(ppc_list, table, bus_type)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_histogram_data_frame(data_frame, bins, axes)
@@ -74,12 +76,19 @@ def visualize_node_histograms(ppc_list: List[Dict],
 def main(cfg):
     data_list = load_data(cfg.data_path)
 
+    bus_type = BusTypeIds(cfg.bus_type) if cfg.bus_type is not None else None
+
     table, columns = table_and_columns_from_config(cfg)
 
     fig, axes = create_subplots_grid(len(columns))
 
     fig.tight_layout()
-    visualize_node_pdfs(data_list, table, node_number=cfg.node_number, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
+    visualize_grid_pdfs(data_list,
+                        table,
+                        bus_type=bus_type,
+                        columns=columns,
+                        kernel=cfg.visualization.kernel,
+                        bandwidth_coeff=cfg.visualization.bandwidth_coeff,
                         axes=axes)
 
     for ax in axes.flatten():
@@ -88,7 +97,7 @@ def main(cfg):
     fig, axes = create_subplots_grid(len(columns))
     fig.tight_layout()
 
-    visualize_node_histograms(data_list, table, node_number=cfg.node_number, columns=columns, bins=cfg.visualization.bins, axes=axes)
+    visualize_grid_histograms(data_list, table, bus_type=bus_type, columns=columns, bins=cfg.visualization.bins, axes=axes)
 
     plt.show()
 

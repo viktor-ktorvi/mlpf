@@ -15,5 +15,6 @@ class BusTableIds(IntEnum):
     voltage_magnitude_pu = 7
     voltage_angle_deg = 8
     base_kV = 9
+    loss_zone = 10
     voltage_max_pu = 11
     voltage_min_pu = 12

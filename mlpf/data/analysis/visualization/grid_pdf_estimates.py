@@ -82,7 +82,8 @@ def main(cfg):
 
     table, columns = table_and_columns_from_config(cfg)
 
-    fig, axes = create_subplots_grid(len(columns))
+    num_columns = len(columns) if columns is not None else data_list[0][table.value].shape[1]
+    fig, axes = create_subplots_grid(num_columns)
 
     fig.tight_layout()
     visualize_grid_pdfs(data_list,
@@ -97,7 +98,7 @@ def main(cfg):
     for ax in axes.flatten():
         ax.set_ylim(bottom=0)
 
-    fig, axes = create_subplots_grid(len(columns))
+    fig, axes = create_subplots_grid(num_columns)
     fig.tight_layout()
 
     visualize_grid_histograms(data_list, table, bus_type=bus_type, columns=columns, bins=cfg.visualization.bins, axes=axes)

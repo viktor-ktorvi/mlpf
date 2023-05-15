@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 from matplotlib import pyplot as plt
 from numpy import ndarray
 
-from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_node, table_and_columns_from_config, create_subplots_grid
+from mlpf.data.analysis.utils import generate_data_frame, ppc_list_extract_nodes, table_and_columns_from_config, create_subplots_grid
 from mlpf.data.analysis.visualization.visualize import visualize_pdf_data_frame, visualize_histogram_data_frame
 from mlpf.data.loading.load_data import load_data
 from mlpf.enumerations.branch_table import BranchTableIds
@@ -41,7 +41,7 @@ def visualize_node_pdfs(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_numbers=node_numbers)
+    dataset = ppc_list_extract_nodes(ppc_list, table, node_numbers=node_numbers)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes, relative_gap_tolerance=relative_gap_tolerance)
@@ -66,7 +66,7 @@ def visualize_node_histograms(ppc_list: List[Dict],
     :return:
     """
 
-    dataset = ppc_list_extract_node(ppc_list, table, node_numbers=node_numbers)
+    dataset = ppc_list_extract_nodes(ppc_list, table, node_numbers=node_numbers)
     data_frame = generate_data_frame(dataset, table, columns)
 
     visualize_histogram_data_frame(data_frame, bins, axes)
@@ -78,7 +78,8 @@ def main(cfg):
 
     table, columns = table_and_columns_from_config(cfg)
 
-    fig, axes = create_subplots_grid(len(columns))
+    num_columns = len(columns) if columns is not None else data_list[0][table.value].shape[1]
+    fig, axes = create_subplots_grid(num_columns)
 
     fig.tight_layout()
     visualize_node_pdfs(data_list,
@@ -93,7 +94,7 @@ def main(cfg):
     for ax in axes.flatten():
         ax.set_ylim(bottom=0)
 
-    fig, axes = create_subplots_grid(len(columns))
+    fig, axes = create_subplots_grid(num_columns)
     fig.tight_layout()
 
     visualize_node_histograms(data_list, table, node_numbers=cfg.node_numbers, columns=columns, bins=cfg.visualization.bins, axes=axes)

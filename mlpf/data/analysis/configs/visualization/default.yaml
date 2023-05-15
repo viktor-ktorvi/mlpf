@@ -1,4 +1,4 @@
-bandwidth_coeff: 0.01
+bandwidth_coeff: 0.03
 bins: 100
 kernel: cosine
 relative_gap_tolerance: 0.03

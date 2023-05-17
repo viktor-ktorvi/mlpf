@@ -80,7 +80,8 @@ def main(cfg):
     :param cfg: hydra config
     :return:
     """
-    net = pn.create_kerber_dorfnetz()  # TODO think of an elegant way to choose grids from the command line
+    # net = pn.create_kerber_dorfnetz()  # TODO think of an elegant way to choose grids from the command line
+    net = pn.case118()
     pp.runpp(net)
     base_ppc = net._ppc
 

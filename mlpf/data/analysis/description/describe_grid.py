@@ -6,9 +6,9 @@ import pandas as pd
 from pandas import DataFrame
 from typing import Dict, List, Union
 
-from mlpf.data.analysis.utils import ppc_list_extract_bus_type
+from mlpf.data.analysis.utils import ppc_list_extract_bus_type, table_and_columns_from_config
 from mlpf.data.analysis.description.describe import generate_description
-from mlpf.data.loading.load_data import load_data
+from mlpf.data.loading.load_data import load_data, autodetect_load_ppc
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.bus_type import BusTypeIds
@@ -48,21 +48,14 @@ def main(cfg):
     * table: str; ppc table string
     :return:
     """
-    data_list = load_data(cfg.data_path)
+    ppc_list = autodetect_load_ppc(cfg.data_path)
 
     bus_type = BusTypeIds(cfg.bus_type) if cfg.bus_type is not None else None
-    table = PPCTables(cfg.table)
+    table, columns = table_and_columns_from_config(cfg)
 
-    if cfg.columns is None:
-        columns = None
-    else:
-        table_ids_enum = get_table_ids(table)
-        columns = [table_ids_enum(i) for i in cfg.columns]
-
-    warnings.filterwarnings('ignore')  # ComplexWarning error
     pd.options.display.max_columns = None
 
-    description = describe_grid(data_list, table=table, bus_type=bus_type, columns=columns)
+    description = describe_grid(ppc_list, table=table, bus_type=bus_type, columns=columns)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
 

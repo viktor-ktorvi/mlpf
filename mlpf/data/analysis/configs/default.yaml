@@ -7,7 +7,9 @@ columns:
   - 8
   - 9
 
-data_path: generated_ppcs
+data_path: powerdatagen_data/train
+
+extension: .p
 
 table: bus
 

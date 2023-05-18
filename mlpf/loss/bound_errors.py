@@ -2,8 +2,6 @@ import torch
 
 from torch import Tensor
 
-from matplotlib import pyplot as plt
-
 
 def upper_bound_error(value: Tensor, value_max: Tensor) -> Tensor:
     """
@@ -63,4 +61,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from matplotlib import pyplot as plt
+
     main()

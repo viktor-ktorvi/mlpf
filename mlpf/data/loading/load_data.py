@@ -6,7 +6,7 @@ from tqdm import tqdm
 from typing import Any, Callable, List
 
 
-def default_load_sample(filepath: str) -> Any:
+def load_pickle_sample(filepath: str) -> Any:
     """
     The default way of loading a data sample(usually a PPC). Assumes that the file is a pickled object.
     :param filepath: Path to a file containing the pickled data sample.
@@ -18,7 +18,7 @@ def default_load_sample(filepath: str) -> Any:
     return data_sample
 
 
-def load_data(path: str, extension: str = ".p", load_sample_function: Callable = default_load_sample) -> List[Any]:
+def load_data(path: str, extension: str = ".p", load_sample_function: Callable = load_pickle_sample) -> List[Any]:
     """
     Load all the data files with the given extension in the directory described by path. By default, assumes that the files are pickled.
     :param path: Path to the data directory.

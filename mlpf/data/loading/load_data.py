@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List
 def load_pickle_ppc(filepath: str) -> Dict:
     """
     The default way of loading a data sample(usually a PPC). Assumes that the file is a pickled object.
+
     :param filepath: Path to a file containing the pickled data sample.
     :return: Data sample.
     """
@@ -26,6 +27,7 @@ def load_pickle_ppc(filepath: str) -> Dict:
 def load_data(path: str, extension: str = ".p", load_sample_function: Callable = load_pickle_ppc) -> List[Any]:
     """
     Load all the data files with the given extension in the directory described by path. By default, assumes that the files are pickled.
+
     :param path: Path to the data directory.
     :param extension: Pile extension.
     :param load_sample_function: Function to load the data samples. By default, is a function that loads a pickled object. The user can pass
@@ -40,6 +42,7 @@ def load_data(path: str, extension: str = ".p", load_sample_function: Callable =
 
 
 def pandapower2ppc_list(pandapower_networks: List[pandapowerNet]) -> List[Dict]:
+    # TODO might wanna move this to a folder like conversion or something similar
     """
     Convert a list of pandapower networks to a list of pypower case files.
 
@@ -58,6 +61,7 @@ def autodetect_load_ppc(path: str) -> List[Dict]:
     """
     Automatically detect the extension that appears in the given directory the most and load the files with that extension if supported.
     For more control over loading data use _load_data_.
+
     :param path: Data directory path.
     :return: List of PPCs
     """

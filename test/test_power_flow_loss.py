@@ -34,7 +34,7 @@ def get_power_flow_loss(ppc: Dict, dtype: torch.dtype = torch.float64) -> float:
 
 
 class TestPowerFlowLoss(unittest.TestCase):
-    def test_power_flow_loss(self):
+    def test_many_topologies(self):
         """
         Test for various grids if the power flow loss function calculates near 0 loss for solved ppcs in float64 accuracy.
         :return:
@@ -43,7 +43,7 @@ class TestPowerFlowLoss(unittest.TestCase):
         nets = get_all_pandapower_networks()
         for net in nets:
             print(net)
-            pp.runpp(net, tolerance_mva=1e-10)
+            pp.runpp(net, tolerance_mva=1e-10, numba=False)
             self.assertAlmostEqual(get_power_flow_loss(net._ppc), 0.0, places=5)
 
 

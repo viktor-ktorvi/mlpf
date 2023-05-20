@@ -20,9 +20,9 @@ def visualize_node_pdfs(ppc_list: List[Dict],
                         table: PPCTables,
                         node_numbers: List[int],
                         columns: List[Union[BusTableIds, GeneratorTableIds, BranchTableIds, GeneratorCostTableIds]] = None,
-                        kernel: str = "tophat", bandwidth_coeff: float = 0.05,
-                        axes: ndarray[Axes] = None,
-                        relative_gap_tolerance: float = 0.03):
+                        kernel: str = "tophat",
+                        bandwidth_coeff: float = 0.05,
+                        axes: ndarray[Axes] = None):
     """
     Estimate and plot the probability density function of each specified column for the specified node and table in the ppc list. If no axes list is provided
     new figures will be created.
@@ -37,14 +37,13 @@ def visualize_node_pdfs(ppc_list: List[Dict],
     will overfit to the given samples. To large of a value will not capture enough detail.
     :param axes: A numpy array of Matplotlib.PyPlot.Axes objects onto which to plot the estimates. If None,
     new figures will be created for every column.
-    :param relative_gap_tolerance: How large(relatively compared to the entire width) can the gaps in the pdf be before the line crossing them is cut.
     :return:
     """
 
     dataset = ppc_list_extract_nodes(ppc_list, table, node_numbers=node_numbers)
     data_frame = generate_data_frame(dataset, table, columns)
 
-    visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes, relative_gap_tolerance=relative_gap_tolerance)
+    visualize_pdf_data_frame(data_frame, kernel, bandwidth_coeff, axes)
 
 
 def visualize_node_histograms(ppc_list: List[Dict],
@@ -82,14 +81,8 @@ def main(cfg):
     fig, axes = create_subplots_grid(num_columns)
 
     fig.tight_layout()
-    visualize_node_pdfs(ppc_list,
-                        table,
-                        node_numbers=cfg.node_numbers,
-                        columns=columns,
-                        kernel=cfg.visualization.kernel,
-                        bandwidth_coeff=cfg.visualization.bandwidth_coeff,
-                        axes=axes,
-                        relative_gap_tolerance=cfg.visualization.relative_gap_tolerance)
+    visualize_node_pdfs(ppc_list, table, node_numbers=cfg.node_numbers, columns=columns, kernel=cfg.visualization.kernel, bandwidth_coeff=cfg.visualization.bandwidth_coeff,
+                        axes=axes)
 
     for ax in axes.flatten():
         ax.set_ylim(bottom=0)

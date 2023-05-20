@@ -5,7 +5,7 @@ import pandapower as pp
 
 from typing import Dict
 
-from mlpf.data.utils.values_from_ppc import extract_values
+from mlpf.data.utils.conversion import ppc2power_flow_values
 from mlpf.data.utils.pandapower_networks import get_all_pandapower_networks
 from mlpf.loss.power_flow import power_flow_errors_pu, scalarize
 
@@ -18,7 +18,7 @@ def get_power_flow_loss(ppc: Dict, dtype: torch.dtype = torch.float64) -> float:
     :param dtype: torch data type
     :return: loss
     """
-    edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_deg, conductances_pu, susceptances_pu, baseMVA, basekV = extract_values(ppc, dtype)
+    edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_deg, conductances_pu, susceptances_pu, baseMVA, basekV = ppc2power_flow_values(ppc, dtype)
 
     active_power_losses_pu, reactive_power_losses_pu = power_flow_errors_pu(edge_index,
                                                                             active_powers_pu,

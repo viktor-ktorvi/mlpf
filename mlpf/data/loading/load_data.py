@@ -3,10 +3,11 @@ import glob
 import os
 import pickle
 
-import pandapower as pp
-from pandapower import from_json, pandapowerNet
+from pandapower import from_json
 from tqdm import tqdm
 from typing import Any, Callable, Dict, List
+
+from mlpf.data.utils.conversion import pandapower2ppc_list
 
 
 def load_pickle_ppc(filepath: str) -> Dict:
@@ -39,22 +40,6 @@ def load_data(path: str, extension: str = ".p", load_sample_function: Callable =
         data_list.append(load_sample_function(filepath))
 
     return data_list
-
-
-def pandapower2ppc_list(pandapower_networks: List[pandapowerNet]) -> List[Dict]:
-    # TODO might wanna move this to a folder like conversion or something similar
-    """
-    Convert a list of pandapower networks to a list of pypower case files.
-
-    :param pandapower_networks:
-    :return:
-    """
-    ppc_list = []
-    for net in pandapower_networks:
-        pp.runpp(net, numba=False)
-        ppc_list.append(net._ppc)
-
-    return ppc_list
 
 
 def autodetect_load_ppc(path: str) -> List[Dict]:

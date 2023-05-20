@@ -1,22 +1,24 @@
+import pandapower as pp
 import torch
 
 import numpy as np
+from pandapower import pandapowerNet
 
 from pypower.makeSbus import makeSbus
 from pypower.makeYbus import makeYbus
 from torch import LongTensor, Tensor
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 from mlpf.enumerations.bus_table import BusTableIds
 
 
-def extract_values(ppc: Dict, dtype: torch.dtype = torch.float32) -> Tuple[LongTensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, Tensor]:
+def ppc2power_flow_values(ppc: Dict, dtype: torch.dtype = torch.float32) -> Tuple[LongTensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, Tensor]:
     """
     Extract the physical values(needed for power flow) from a network and return them as torch tensors.
 
     :param ppc: pypower case format dict
     :param dtype: torch data type
-    :return: edge list plus the physical values of a network
+    :return: (edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_deg, conductances_pu, susceptances_pu, baseMVA, basekV)
     """
     # extract powers - convert to per unit and return generation minus demand
     complex_power = makeSbus(ppc['baseMVA'], ppc['bus'], ppc['gen'])
@@ -57,3 +59,18 @@ def extract_values(ppc: Dict, dtype: torch.dtype = torch.float32) -> Tuple[LongT
     edge_index = torch.LongTensor(edge_index)
 
     return edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_deg, conductances_pu, susceptances_pu, baseMVA, basekV
+
+
+def pandapower2ppc_list(pandapower_networks: List[pandapowerNet]) -> List[Dict]:
+    """
+    Convert a list of pandapower networks to a list of pypower case files.
+
+    :param pandapower_networks:
+    :return:
+    """
+    ppc_list = []
+    for net in pandapower_networks:
+        pp.runpp(net, numba=False)
+        ppc_list.append(net._ppc)
+
+    return ppc_list

@@ -4,23 +4,26 @@ from torch import Tensor
 from torch_scatter import scatter_sum
 from typing import Callable, Tuple
 
+from mlpf.loss.utils import make_sparse_admittance_matrix
+
 
 # TODO make numpy version for sklearn
-def power_flow_errors(edge_index: Tensor,
-                      active_powers: Tensor,
-                      reactive_powers: Tensor,
-                      voltages: Tensor,
-                      angles: Tensor,
-                      conductances: Tensor,
-                      susceptances: Tensor) -> Tuple[Tensor, Tensor]:
+def power_flow_errors_scatter(edge_index: Tensor,
+                              active_powers: Tensor,
+                              reactive_powers: Tensor,
+                              voltages: Tensor,
+                              angles_rad: Tensor,
+                              conductances: Tensor,
+                              susceptances: Tensor) -> Tuple[Tensor, Tensor]:
     """
-    Calculate power flow equations errors. All the input variables need to be in SI units.
+    Calculate power flow equations errors efficiently using scatter sums. The values can be in either SI or per unit
+    as long as the conventions are not mixed.Angles need to be in radians.
 
     :param edge_index: edge list
     :param active_powers: P
     :param reactive_powers: Q
     :param voltages: V magnitude
-    :param angles: V angle(rad)
+    :param angles_rad: V angle(rad)
     :param conductances: G
     :param susceptances: B
     :return: active and reactive power errors
@@ -30,69 +33,52 @@ def power_flow_errors(edge_index: Tensor,
 
     voltage_product = voltages[source] * voltages[target]
 
-    angle_differences = angles[source] - angles[target]
+    angle_differences = angles_rad[source] - angles_rad[target]
 
     cosine = torch.cos(angle_differences)
     sine = torch.sin(angle_differences)
 
-    active_power_losses = scatter_sum(voltage_product * conductances * cosine, source) + scatter_sum(voltage_product * susceptances * sine, source) - active_powers
-    reactive_power_losses = scatter_sum(voltage_product * conductances * sine, source) - scatter_sum(voltage_product * susceptances * cosine, source) - reactive_powers
+    active_power_errors = scatter_sum(voltage_product * conductances * cosine, source) + scatter_sum(voltage_product * susceptances * sine, source) - active_powers
+    reactive_power_errors = scatter_sum(voltage_product * conductances * sine, source) - scatter_sum(voltage_product * susceptances * cosine, source) - reactive_powers
 
-    return active_power_losses, reactive_power_losses
+    return active_power_errors, reactive_power_errors
 
 
-def power_flow_errors_pu(edge_index: Tensor,
-                         active_powers_pu: Tensor,
-                         reactive_powers_pu: Tensor,
-                         voltages_pu: Tensor,
-                         angles_deg: Tensor,
-                         conductances_pu: Tensor,
-                         susceptances_pu: Tensor,
-                         baseMVA: float,
-                         basekV: Tensor) -> Tuple[Tensor, Tensor]:
+def power_flow_errors_sparse(edge_index: Tensor,
+                             active_powers: Tensor,
+                             reactive_powers: Tensor,
+                             voltages: Tensor,
+                             angles_rad: Tensor,
+                             conductances: Tensor,
+                             susceptances: Tensor) -> Tuple[Tensor, Tensor]:
     """
-    Calculate power flow errors per unit(pu). All values must be provided per unit, except for angles which must be provided in
-    degrees as is the standard in pypower and pandapower. The baseMVA scalar and the basekV tensor(for multi-voltage support)
-    must be provided.
+    Calculate power flow equations errors efficiently using sparse matrix multiplication. The values can be in either SI or per unit
+    as long as the conventions are not mixed. Angles need to be in radians.
 
     :param edge_index: edge list
-    :param active_powers_pu: P
-    :param reactive_powers_pu: Q
-    :param voltages_pu: V magnitude
-    :param angles_deg: V angle
-    :param conductances_pu: G
-    :param susceptances_pu: B
-    :param baseMVA: base power scalar in MVA
-    :param basekV: base voltage tensor in kV
-    :return:
+    :param active_powers: P
+    :param reactive_powers: Q
+    :param voltages: V magnitude
+    :param angles_rad: V angle(rad)
+    :param conductances: G
+    :param susceptances: B
+    :return: active and reactive power errors
     """
-    active_powers = active_powers_pu * baseMVA
-    reactive_powers = reactive_powers_pu * baseMVA
+    admittance_matrix = make_sparse_admittance_matrix(edge_index, conductances, susceptances)
 
-    voltages = voltages_pu * basekV
-    angles = torch.deg2rad(angles_deg)
+    complex_voltages = (voltages * torch.exp(1j * angles_rad)).reshape(-1, 1)
 
-    base_admittance = baseMVA / basekV[edge_index[0]] / basekV[edge_index[1]]
+    currents = admittance_matrix @ complex_voltages
 
-    conductances = conductances_pu * base_admittance
-    susceptances = susceptances_pu * base_admittance
+    complex_powers = complex_voltages * torch.conj(currents)
 
-    active_power_losses, reactive_power_losses = power_flow_errors(edge_index,
-                                                                   active_powers,
-                                                                   reactive_powers,
-                                                                   voltages,
-                                                                   angles,
-                                                                   conductances,
-                                                                   susceptances)
+    complex_errors = complex_powers.squeeze() - (active_powers + 1j * reactive_powers)
 
-    active_power_losses_pu = active_power_losses / baseMVA
-    reactive_power_losses_pu = reactive_power_losses / baseMVA
-
-    return active_power_losses_pu, reactive_power_losses_pu
+    return torch.real(complex_errors), torch.imag(complex_errors)
 
 
-def scalarize(active_power_losses: Tensor,
-              reactive_power_losses: Tensor,
+def scalarize(active_power_errors: Tensor,
+              reactive_power_errors: Tensor,
               element_wise_function: Callable = torch.abs,
               active_power_coeff: float = 1.0,
               reactive_power_coeff: float = 1.0) -> Tensor:
@@ -100,14 +86,14 @@ def scalarize(active_power_losses: Tensor,
     Scalarize the tensors of errors by doing a weighted sum. An element wise operation can be applied to the tensor before
     summing up e.g. absolute value or square.
 
-    :param active_power_losses: delta P
-    :param reactive_power_losses: delta Q
+    :param active_power_errors: delta P
+    :param reactive_power_errors: delta Q
     :param element_wise_function: callable
     :param active_power_coeff: P weight
     :param reactive_power_coeff: Q weight
     :return: scalar loss value
     """
     return torch.sum(
-        active_power_coeff * element_wise_function(active_power_losses) +
-        reactive_power_coeff * element_wise_function(reactive_power_losses)
+        active_power_coeff * element_wise_function(active_power_errors) +
+        reactive_power_coeff * element_wise_function(reactive_power_errors)
     )

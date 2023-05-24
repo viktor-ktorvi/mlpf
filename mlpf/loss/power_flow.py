@@ -7,7 +7,6 @@ from typing import Callable, Tuple
 from mlpf.loss.utils import make_sparse_admittance_matrix
 
 
-# TODO make numpy version for sklearn
 def power_flow_errors_scatter(edge_index: Tensor,
                               active_powers: Tensor,
                               reactive_powers: Tensor,

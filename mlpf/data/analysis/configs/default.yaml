@@ -7,7 +7,7 @@ columns:
   - 8
   - 9
 
-data_path: powerdatagen_data/train
+data_path: generated_ppcs
 
 extension: .p
 

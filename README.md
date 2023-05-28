@@ -1,66 +1,39 @@
-# MLPF - Machine Learning for Power Flow
+# mlpf - Machine Learning for Power Flow
+
+_mlpf_ is a python library for (optimal) power flow calculations with machine learning.
+It offers:
+
+* efficient loss functions compatible with both _PyTorch_ and _scikit-learn_!
+* utilities such as data structures and loading pipelines that make it easy to go from
+  _pandapower_ nets or _PYPOWER_ case files to arrays and tensors in just one line of code!
+* visualization and description tools to take a quick look at your data
+
+## Usage
+
+-[ ] One big TODO
+
+### Data loading
+
+### Loss
+
+#### scikit-learn
+
+#### torch
+
+### Indepth examples
 
 ## Installation
+
+### Pip
+
+-[ ] TODO Publish package
+
+### Development
 
 ```
 git clone https://github.com/viktor-ktorvi/mlpf.git
 cd mlpf
 
-conda create -n mlpfenv python=3.10
+conda env create -f environment.yml
 conda activate mlpfenv
-pip install -r requirements.txt
-
 ```
-
-## Modify requirements
-
-```
-pip3 freeze > requirements.txt
-```
-
-## Generate docs
-
-```
-mkdir docs
-cd docs
-
-sphinx-quickstart
-# fill out form
-cd ..
-sphinx-apidoc -o docs mlpf
-
-cd docs
-```
-
-In _index.rst_ write 'modules' under ':caption: Contents:' like so:
-
-```
-   :caption: Contents:
-
-   modules
-```
-
-In _conf.py_ change the following:
-
-```python
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(".."))
-
-...
-
-extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc"]
-
-...
-
-html_theme = 'sphinx_rtd_theme'
-```
-
-Generate the html file:
-
-```
-.\make.bat html
-```
-
-I had to delete a bunch of unnecessary crap manually to make it look decent. There must be a better way.

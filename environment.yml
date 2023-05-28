@@ -1,0 +1,13 @@
+name: mlpfenv
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+      - --find-links https://download.pytorch.org/whl/torch_stable.html
+      - --find-links https://data.pyg.org/whl/torch-1.13.0+cpu.html
+      - --find-links https://data.pyg.org/whl/torch-1.13.0+cu116.html
+      - --find-links https://data.pyg.org/whl/torch-1.13.0+cu117.html
+      - --find-links https://data.pyg.org/whl/torch-2.0.0+cpu.html
+      - --find-links https://data.pyg.org/whl/torch-2.0.0+cu117.html
+      - --find-links https://data.pyg.org/whl/torch-2.0.0+cu118.html
+      - -r requirements.txt

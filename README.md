@@ -1,3 +1,5 @@
+![mlpf logo.png](images%2Fmlpf%20logo.png)
+
 # mlpf - Machine Learning for Power Flow
 
 _mlpf_ is a python library for (optimal) power flow calculations with machine learning.

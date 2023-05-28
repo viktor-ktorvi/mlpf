@@ -1,10 +1,41 @@
-import torch
-
-from torch import Tensor
-from torch_scatter import scatter_sum
 from typing import Callable, Tuple
 
+import torch
+from torch import Tensor
+from torch_scatter import scatter_sum
+
 from mlpf.loss.utils import make_sparse_admittance_matrix
+
+
+def power_flow_errors(edge_index: Tensor,
+                      active_powers: Tensor,
+                      reactive_powers: Tensor,
+                      voltages: Tensor,
+                      angles_rad: Tensor,
+                      conductances: Tensor,
+                      susceptances: Tensor,
+                      method: str = "scatter") -> Tuple[Tensor, Tensor]:
+    """
+    Calculate power flow equations errors efficiently. The values can be in either SI or per unit
+    as long as the conventions are not mixed. Angles need to be in radians.
+
+    :param edge_index: edge list
+    :param active_powers: P
+    :param reactive_powers: Q
+    :param voltages: V magnitude
+    :param angles_rad: V angle(rad)
+    :param conductances: G
+    :param susceptances: B
+    :param method: How to perform the calculation.  # TODO more about the differences between the methods
+    :return: active and reactive power errors
+    """
+    if method == "scatter":
+        return power_flow_errors_scatter(edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances)
+
+    if method == "sparse":
+        return power_flow_errors_sparse(edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances)
+
+    raise ValueError(f"Method '{method}' is not supported. Supported methods are 'scatter' and 'sparse'")
 
 
 def power_flow_errors_scatter(edge_index: Tensor,
@@ -16,7 +47,7 @@ def power_flow_errors_scatter(edge_index: Tensor,
                               susceptances: Tensor) -> Tuple[Tensor, Tensor]:
     """
     Calculate power flow equations errors efficiently using scatter sums. The values can be in either SI or per unit
-    as long as the conventions are not mixed.Angles need to be in radians.
+    as long as the conventions are not mixed. Angles need to be in radians.
 
     :param edge_index: edge list
     :param active_powers: P

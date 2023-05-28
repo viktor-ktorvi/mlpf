@@ -7,7 +7,7 @@ import torch
 
 from mlpf.data.utils.conversion import ppc2power_flow_tensors
 from mlpf.data.utils.pandapower_networks import get_all_pandapower_networks
-from mlpf.loss.power_flow import power_flow_errors_scatter, power_flow_errors_sparse, scalarize
+from mlpf.loss.power_flow import power_flow_errors, scalarize
 
 
 def get_power_flow_loss(ppc: Dict, method="scatter", dtype: torch.dtype = torch.float64) -> float:
@@ -21,24 +21,15 @@ def get_power_flow_loss(ppc: Dict, method="scatter", dtype: torch.dtype = torch.
     """
     edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad, conductances_pu, susceptances_pu = ppc2power_flow_tensors(ppc, dtype)
 
-    if method == "scatter":
-        active_power_losses_pu, reactive_power_losses_pu = power_flow_errors_scatter(
-            edge_index,
-            active_powers_pu,
-            reactive_powers_pu,
-            voltages_pu, angles_rad,
-            conductances_pu,
-            susceptances_pu)
-    elif method == "sparse":
-        active_power_losses_pu, reactive_power_losses_pu = power_flow_errors_sparse(
-            edge_index,
-            active_powers_pu,
-            reactive_powers_pu,
-            voltages_pu, angles_rad,
-            conductances_pu,
-            susceptances_pu)
-    else:
-        raise NotImplemented
+    active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
+        edge_index,
+        active_powers_pu,
+        reactive_powers_pu,
+        voltages_pu, angles_rad,
+        conductances_pu,
+        susceptances_pu,
+        method=method
+    )
 
     return float(scalarize(active_power_losses_pu, reactive_power_losses_pu))
 

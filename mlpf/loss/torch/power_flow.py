@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 from torch_scatter import scatter_sum
 
-from mlpf.loss.utils import make_sparse_admittance_matrix
+from mlpf.loss.torch.utils import make_sparse_admittance_matrix
 
 
 def power_flow_errors(edge_index: Tensor,

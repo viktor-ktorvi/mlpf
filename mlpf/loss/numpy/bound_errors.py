@@ -1,9 +1,9 @@
-import torch
+import numpy as np
 
-from torch import Tensor
+from numpy import ndarray
 
 
-def upper_bound_error(value: Tensor, value_max: Tensor) -> Tensor:
+def upper_bound_error(value: ndarray, value_max: ndarray) -> ndarray:
     """
     Return the difference between the value and its maximum value if the value is larger than the maximum value, otherwise return 0.
 
@@ -11,10 +11,10 @@ def upper_bound_error(value: Tensor, value_max: Tensor) -> Tensor:
     :param value_max: Maximum allowed value.
     :return: Error.
     """
-    return torch.maximum(torch.zeros_like(value), value - value_max)
+    return np.maximum(np.zeros_like(value), value - value_max)
 
 
-def lower_bound_error(value: Tensor, value_min: Tensor) -> Tensor:
+def lower_bound_error(value: ndarray, value_min: ndarray) -> ndarray:
     """
     Return the difference between the value and its minimum value if the value is smaller than the minimum value, otherwise return 0.
 
@@ -22,15 +22,15 @@ def lower_bound_error(value: Tensor, value_min: Tensor) -> Tensor:
     :param value_min: Minimum allowed value.
     :return: Error.
     """
-    return torch.minimum(torch.zeros_like(value), value - value_min)
+    return np.minimum(np.zeros_like(value), value - value_min)
 
 
 def main():
-    x = torch.linspace(-5, 5, 1000)
+    x = np.linspace(-5, 5, 1000)
     offset = 0
-    values = (torch.exp(-x ** 2) - 0.5) * 5 + offset
-    upper_bound = torch.cos(x) + offset
-    lower_bound = torch.sin(x) - 2 + offset
+    values = (np.exp(-x ** 2) - 0.5) * 5 + offset
+    upper_bound = np.cos(4 * x) + offset
+    lower_bound = np.sin(4 * x) - 2 + offset
 
     upper_error = upper_bound_error(values, upper_bound)
     lower_error = lower_bound_error(values, lower_bound)
@@ -40,7 +40,7 @@ def main():
     alpha = 0.2
 
     fig, ax = plt.subplots(2, 1, sharex=True)
-    fig.suptitle("Upper and lower bound error demonstration")
+    fig.suptitle("NumPy - Upper and lower bound error demonstration")
     ax[0].grid()
     ax[0].set_ylabel("value")
     ax[0].plot(x, values, color="b", label="value")

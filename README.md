@@ -1,4 +1,5 @@
-![logo.png](images%2Flogo.png)
+<img src="images/logo.png" width="650">
+
 
 __MLPF__ is a python library for (optimal) power flow calculations with machine learning.
 It offers:

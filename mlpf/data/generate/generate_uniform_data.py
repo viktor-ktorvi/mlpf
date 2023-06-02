@@ -30,6 +30,7 @@ def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high:
     :param high: High value multiplier in the uniform distribution.
     :return: List of ppcs
     """
+    warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
 
     bus_variables = [BusTableIds.active_power_MW, BusTableIds.reactive_power_MVAr, BusTableIds.voltage_magnitude_pu, BusTableIds.voltage_angle_deg]
     gen_variables = [GeneratorTableIds.active_power_MW, GeneratorTableIds.reactive_power_MVAr]
@@ -63,6 +64,7 @@ def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high:
         converged = False
         solved_random_ppc = None
 
+        # TODO this resampling might be skewing the distribution. This is telling me that I really need the test for this
         # repeat until convergence
         while not converged:
             # create a random ppc and solve the power flow of that ppcs

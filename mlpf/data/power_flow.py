@@ -1,4 +1,7 @@
+from typing import List, Tuple
+
 import numpy as np
+from numpy import ndarray
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 
@@ -56,5 +59,14 @@ class PowerFlowData:
     def voltage_angle(self):
         return self.grid_feature_matrix[:, PowerFlowFeatureIds.voltage_angle]
 
-    def to_tensor(self, device):
-        raise NotImplemented
+
+def data2features_and_targets(data_list: List[PowerFlowData]) -> Tuple[ndarray, ndarray]:
+    """
+    Concatenate the feature/target vectors in a list of data objects to get a feature/target matrix.
+    :param data_list: List of data objects
+    :return:
+    """
+    feature_matrix = np.vstack([data.feature_vector for data in data_list])
+    target_matrix = np.vstack([data.target_vector for data in data_list])
+
+    return feature_matrix, target_matrix

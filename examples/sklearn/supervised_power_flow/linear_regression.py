@@ -67,7 +67,7 @@ def main():
         columns=["relative active power error", "relative reactive power error"]
     )
 
-    pd.set_option('display.float_format', lambda x: "{:2.3f} %".format(x * 100))
+    pd.set_option('display.float_format', lambda x: "{:2.4f} ".format(x))
     print(rel_errors_df.describe())
 
 

@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch_geometric as pyg
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
+from torcheval.metrics.functional import r2_score
 from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data, get_relative_power_flow_errors
@@ -20,9 +21,15 @@ def list_of_dicts2dict_of_lists(list_of_dicts: List[Dict]) -> Dict:
 def collect_logs(loss, predictions, batch):
     # TODO dict could be a dataclass
 
+    # TODO the averaging is gonna make a biased estimate when the last batch is a lot smaller than the rest; maybe saving every sample and not batching would be ok?
+
     relative_active_power_errors, relative_reactive_power_errors = get_relative_power_flow_errors(predictions.detach().cpu(), batch)
+    r2score = r2_score(predictions.detach().cpu(), batch.target_vector, multioutput="raw_values").detach()
+    r2score[torch.isinf(r2score)] = 0.0
+
     return {
         "loss": loss.item(),
+        "r2_score": torch.mean(r2score).item(),
         "rel P error mean": torch.mean(relative_active_power_errors).item(),
         "rel P error median": torch.median(relative_active_power_errors).item()
     }
@@ -63,14 +70,14 @@ def main():
     # Model
     model = nn.Sequential(
         StandardScalar(train_features),
-        nn.Linear(in_features=input_size, out_features=output_size)
+        nn.Linear(in_features=input_size, out_features=output_size),
     )
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
-    progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training")
+    progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")
 
     for epoch in progress_bar:
         train_logs = []
@@ -110,14 +117,16 @@ def main():
         # Logging
         train_log = list_of_dicts2dict_of_lists(train_logs)
         val_log = list_of_dicts2dict_of_lists(val_logs)
-        progress_bar.set_description("Training: loss: train={:2.4f}, val={:2.4f}; rel P error: mean: train={:2.4f}, val={:2.4f}, median: train={:2.4f}, val={:2.4f}".format(
-            np.mean(train_log["loss"]),
-            np.mean(val_log["loss"]),
-            np.mean(train_log["rel P error mean"]),
-            np.mean(val_log["rel P error mean"]),
-            np.mean(train_log["rel P error median"]),
-            np.mean(val_log["rel P error median"])
-        )
+
+        loss_str = f"loss: ({np.mean(train_log['loss']):2.4f} | {np.mean(val_log['loss']):2.4f})"
+        r2score_str = f"r2score: ({np.mean(train_log['r2_score']):2.4f} | {np.mean(val_log['r2_score']):2.4f})"
+        mean_rel_P_error_str = f"mean: ({np.mean(train_log['rel P error mean']):2.4f} | {np.mean(val_log['rel P error mean']):2.4f})"
+        median_rel_P_error_str = f"median: ({np.mean(train_log['rel P error median']):2.4f} | {np.mean(val_log['rel P error median']):2.4f})"
+
+        # the PF errors reach a minimum but then start climbing again while the loss keeps declining because the loss focuses on minimizing some larger scale
+        # components of itself while neglecting the smaller ones which has a noticeable effect on the PF.
+        progress_bar.set_description(
+            f"Training | Validation: {loss_str}; {r2score_str}; relative active power error: {mean_rel_P_error_str}, {median_rel_P_error_str}"
         )
 
 

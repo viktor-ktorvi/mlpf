@@ -1,13 +1,17 @@
 import torch
+
 import torch.nn as nn
 import torch_geometric as pyg
+
+from pandas.io.json._normalize import nested_to_record
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
+from torchmetrics import MetricCollection, MeanSquaredError, R2Score
 from tqdm import tqdm
 
-from examples.torch.supervised_power_flow.utils import supervised_pf_logs, logs2str
 from mlpf.data.data.torch.power_flow import power_flow_data
 from mlpf.data.loading.load_data import autodetect_load_ppc
+from mlpf.loss.torch.metrics.power_flow import RelativePowerFlowError
 from mlpf.utils.standard_scaler import StandardScaler
 
 
@@ -17,7 +21,7 @@ def main():
 
     # Hyperparameters
     num_epochs = 1000
-    batch_size = 512
+    batch_size = 64
     learning_rate = 3e-3
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,11 +64,14 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
+    metrics_train = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size), RelativePowerFlowError()).to(device)
+    metrics_val = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size), RelativePowerFlowError()).to(device)
+    # metrics_train = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size)).to(device)
+    # metrics_val = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size)).to(device)
+
     progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")
 
     for epoch in progress_bar:
-        train_logs = []
-        val_logs = []
 
         # Training
         model.train()
@@ -79,7 +86,7 @@ def main():
             loss = criterion(predictions, output_scaler(targets))
             loss.backward()
 
-            train_logs.append(supervised_pf_logs(loss, output_scaler.inverse(predictions), batch))
+            metrics_train(preds=predictions, target=output_scaler(targets), preds_pf=output_scaler.inverse(predictions), batch=batch)
 
             optimizer.step()
 
@@ -93,18 +100,21 @@ def main():
                 targets = targets.to(device)
 
                 predictions = model(features)
-                loss = criterion(predictions, output_scaler(targets))
 
-                val_logs.append(supervised_pf_logs(loss, output_scaler.inverse(predictions), batch))
+                metrics_val(preds=predictions, target=output_scaler(targets), preds_pf=output_scaler.inverse(predictions), batch=batch)
 
-        # Logging
-        loss_str, r2score_str, mean_rel_P_error_str, median_rel_P_error_str = logs2str(train_logs, val_logs)
+        overall_metrics_train = nested_to_record(metrics_train.compute(), sep='_')
+        overall_metrics_val = nested_to_record(metrics_val.compute(), sep='_')
 
-        # the PF errors reach a minimum but then start climbing again while the loss keeps declining because the loss focuses on minimizing some larger scale
-        # components of itself while neglecting the smaller ones which has a noticeable effect on the PF.
-        progress_bar.set_description(
-            f"Training | Validation: {loss_str}; {r2score_str}; relative active power error: {mean_rel_P_error_str}, {median_rel_P_error_str}"
-        )
+        description = "Training | Validation:"
+
+        for key in overall_metrics_train.keys():
+            description += f" {key}: ({overall_metrics_train[key]:2.4f} | {overall_metrics_val[key]:2.4f});"
+
+        progress_bar.set_description(description)
+
+        metrics_train.reset()
+        metrics_val.reset()
 
 
 if __name__ == '__main__':

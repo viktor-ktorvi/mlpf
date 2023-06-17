@@ -16,3 +16,4 @@ torch-spline-conv==1.2.2+pt20cu117
 torchaudio==2.0.2+cu117
 torchvision==0.15.2+cu117
 tqdm==4.65.0
+torchmetrics~=0.11.4

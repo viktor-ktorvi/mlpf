@@ -21,7 +21,7 @@ def main():
 
     # Hyperparameters
     num_epochs = 1000
-    batch_size = 64
+    batch_size = 512
     learning_rate = 3e-3
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,10 +64,17 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
-    metrics_train = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size), RelativePowerFlowError()).to(device)
-    metrics_val = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size), RelativePowerFlowError()).to(device)
-    # metrics_train = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size)).to(device)
-    # metrics_val = MetricCollection(MeanSquaredError(), R2Score(num_outputs=output_size)).to(device)
+    metrics_train = MetricCollection(
+        MeanSquaredError(),
+        R2Score(num_outputs=output_size),
+        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+    ).to(device)
+
+    metrics_val = MetricCollection(
+        MeanSquaredError(),
+        R2Score(num_outputs=output_size),
+        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+    ).to(device)
 
     progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")
 

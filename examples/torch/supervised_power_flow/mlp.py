@@ -39,7 +39,6 @@ def main():
     # Torch dataloaders
 
     train_loader = DataLoader(data_train, batch_size=batch_size, shuffle=True)
-
     val_loader = DataLoader(data_val, batch_size=batch_size, shuffle=False)
 
     input_size = data_train[0].feature_vector.shape[1]
@@ -48,9 +47,6 @@ def main():
     train_features = torch.vstack([data.feature_vector for data in data_train])
     train_targets = torch.vstack([data.target_vector for data in data_train])
 
-    # the output variables are of varying orders of magnitude so not normalizing them will the MSE loss
-    # favoring larger variables and the weights in the final layer being of varying orders of magnitude themselves.
-    # when calculating the power flow loss, an inverse transform needs to be applied to the predictions
     output_scaler = StandardScaler(train_targets)
     output_scaler.to(device)
 

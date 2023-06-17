@@ -29,8 +29,6 @@ class GNN(torch.nn.Module):
 
 
 def main():
-    # TODO can't say I understand this training process; the PF loss keeps rising while the loss keeps falling even though I normalized the outputs;
-    #  but at the end if falls a little bit again
 
     # Random seeds
     pyg.seed_everything(123)

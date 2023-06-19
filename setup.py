@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from setuptools import setup, find_packages
 
 classifiers = [
@@ -9,10 +11,15 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Artificial Intelligence'
 ]
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name='mlpf',
-    version='0.0.1',
+    version='0.0.3',
     description='Machine learning for power flow',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='',
     author='Viktor Todosijevic',
     author_email='todosijevicviktor998@gmail.com',

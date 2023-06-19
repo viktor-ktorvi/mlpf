@@ -1,4 +1,3 @@
-
 <p align="center">
 <img src="https://github.com/viktor-ktorvi/mlpf/assets/69254199/333dfd18-7c60-4874-a89b-92eecf32ac96?raw=True" width="650">
 </p>

@@ -1,6 +1,9 @@
+
 <p align="center">
-<img src="images/logo.png" width="650">
+<img src="https://github.com/viktor-ktorvi/mlpf/assets/69254199/333dfd18-7c60-4874-a89b-92eecf32ac96?raw=True" width="650">
 </p>
+
+
 
 __MLPF__ is a python library for (optimal) power flow calculations with machine learning.
 It offers:

@@ -88,6 +88,17 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
 
 ### Indepth examples
 
+#### General
+* [NumPy/scikit-learn loss](examples/sklearn/loss/from_arrays.py)
+* [Torch loss](examples/torch/loss/from_arrays.py)
+
+#### Supervised learning
+
+##### Power flow
+* [scikit-learn linear regression](examples/sklearn/supervised_power_flow/linear_regression.py)
+* [torch linear regression](examples/torch/supervised_power_flow/mlp.py)
+* [torch GCN(graph convolutional network)](examples/torch/supervised_power_flow/gcn.py)
+
 ### Development
 
 ```

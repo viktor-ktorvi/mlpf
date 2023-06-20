@@ -58,7 +58,8 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
   edge_index,
   active_powers_pu,
   reactive_powers_pu,
-  voltages_pu, angles_rad,
+  voltages_pu,
+  angles_rad,
   conductances_pu,
   susceptances_pu
 )
@@ -78,7 +79,8 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
   edge_index,
   active_powers_pu,
   reactive_powers_pu,
-  voltages_pu, angles_rad,
+  voltages_pu,
+  angles_rad,
   conductances_pu,
   susceptances_pu
 )

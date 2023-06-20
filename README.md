@@ -7,9 +7,9 @@
 __MLPF__ is a python library for (optimal) power flow calculations with machine learning.
 It offers:
 
-* efficient loss functions compatible with both _PyTorch_ and _scikit-learn_!
+* efficient loss functions compatible with both _PyTorch_ and _scikit-learn_
 * utilities such as data structures and loading pipelines that make it easy to go from
-  _pandapower_ nets or _PYPOWER_ case files to arrays and tensors in just one line of code!
+  _pandapower_ nets or _PYPOWER_ case files to arrays and tensors in just one line of code
 * visualization and description tools to take a quick look at your data
 
 Contributions welcome!
@@ -19,6 +19,11 @@ Contributions welcome!
 ```commandline
 pip install mlpf
 ```
+
+The previous command will install all the dependencies for working with numpy and scikit-learn. It will **not**, however, install all the dependencies needed for
+working in torch. To use the torch functionalities, please
+install [PyTorch](https://pytorch.org/), [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html) with its dependencies(torch-scatter etc.)
+and optionally [TorchMetrics](https://torchmetrics.readthedocs.io/en/stable/).
 
 ## Usage
 
@@ -93,12 +98,14 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
 ### Indepth examples
 
 #### General
+
 * [NumPy/scikit-learn loss](examples/sklearn/loss/from_arrays.py)
 * [Torch loss](examples/torch/loss/from_arrays.py)
 
 #### Supervised learning
 
 ##### Power flow
+
 * [scikit-learn linear regression](examples/sklearn/supervised_power_flow/linear_regression.py)
 * [torch linear regression](examples/torch/supervised_power_flow/mlp.py)
 * [torch GCN(graph convolutional network)](examples/torch/supervised_power_flow/gcn.py)

@@ -1,8 +1,13 @@
 import random
 
 import numpy as np
+import pandapower as pp
+import pandapower.networks as pn
 import pandas as pd
+
 from pandas import DataFrame
+from pypower.ppoption import ppoption
+from pypower.runpf import runpf
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
@@ -10,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 from mlpf.data.data.numpy.power_flow import power_flow_data, get_relative_power_flow_errors
-from mlpf.data.loading.load_data import autodetect_load_ppc
+from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 
 
 def main():
@@ -18,10 +23,21 @@ def main():
     np.random.seed(123)
     random.seed(123)
 
-    # Load ppcs and ppc -> Data
+    # Generate ppcs
 
-    ppc_list = autodetect_load_ppc("generated_ppcs", max_samples=1000, shuffle=True)
+    net = pn.case118()
+    ppc = pp.converter.to_ppc(net, init="flat")
 
+    base_ppc, converged = runpf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
+
+    ppc_list = generate_uniform_ppcs(
+        base_ppc,
+        how_many=1000,
+        low=0.9,
+        high=1.1
+    )
+
+    # ppc -> Data
     pf_data_list = []
     for ppc in tqdm(ppc_list, ascii=True, desc="Converting ppcs to data"):
         pf_data_list.append(power_flow_data(ppc))
@@ -45,8 +61,8 @@ def main():
 
     # Evaluation
 
-    print(f"Train coefficient of determination = {model.score(features_train, targets_train)} (max is 1.0)")
-    print(f"Validation coefficient of determination = {model.score(features_val, targets_val)} (max is 1.0)\n")
+    print(f"Train R2 score = {model.score(features_train, targets_train)}")
+    print(f"Val R2 score = {model.score(features_val, targets_val)}\n")
 
     val_predictions = model.predict(features_val)
 

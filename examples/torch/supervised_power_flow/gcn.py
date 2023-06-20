@@ -1,14 +1,20 @@
 import torch
+
+import pandapower as pp
+import pandapower.networks as pn
 import torch.nn as nn
 import torch_geometric as pyg
+
 from pandas.io.json._normalize import nested_to_record
+from pypower.ppoption import ppoption
+from pypower.runpf import runpf
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
 from torchmetrics import MetricCollection, MeanSquaredError, R2Score
 from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data
-from mlpf.data.loading.load_data import autodetect_load_ppc
+from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.loss.torch.metrics.power_flow import RelativePowerFlowError
 from mlpf.utils.standard_scaler import StandardScaler
 
@@ -29,6 +35,7 @@ class GNN(torch.nn.Module):
 
 
 def main():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Random seeds
     pyg.seed_everything(123)
@@ -40,12 +47,21 @@ def main():
     num_layers = 3
     learning_rate = 3e-4
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Generate ppcs
 
-    # Load ppcs and ppc -> Data
+    net = pn.case118()
+    ppc = pp.converter.to_ppc(net, init="flat")
 
-    solved_ppc_list = autodetect_load_ppc("generated_ppcs", shuffle=True, max_samples=1000)
+    base_ppc, converged = runpf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
 
+    solved_ppc_list = generate_uniform_ppcs(
+        base_ppc,
+        how_many=1000,
+        low=0.9,
+        high=1.1
+    )
+
+    # ppc -> Data
     pf_data_list = []
     for solved_ppc in tqdm(solved_ppc_list, ascii=True, desc="Converting ppcs to data"):
         pf_data_list.append(power_flow_data(solved_ppc))

@@ -1,10 +1,9 @@
-import numpy as np
+from typing import Dict, List, Union, Tuple, Any
 
+import numpy as np
+from matplotlib import pyplot as plt
 from numpy import ndarray
 from pandas import DataFrame
-from typing import Dict, List, Union, Tuple, Type
-
-from matplotlib import pyplot as plt
 
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
@@ -137,7 +136,7 @@ def generate_data_frame(dataset: ndarray,
     return DataFrame(data=dataset[:, column_ids], columns=column_names)
 
 
-def table_and_columns_from_config(cfg) -> Tuple[PPCTables, Union[List[Type[BusTableIds | BranchTableIds | GeneratorTableIds | GeneratorCostTableIds]], None]]:
+def table_and_columns_from_config(cfg) -> Tuple[PPCTables, Union[List[Any], None]]:
     """
     Extract the table and column objects using the given config.
 

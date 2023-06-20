@@ -1,5 +1,5 @@
-from enum import Enum, IntEnum
-from typing import Type
+from enum import Enum
+from typing import Type, Any
 
 from mlpf.enumerations.branch_table import BranchTableIds
 from mlpf.enumerations.bus_table import BusTableIds
@@ -18,7 +18,7 @@ class PPCTables(Enum):
     GeneratorCost = "gencost"
 
 
-def get_table_ids(table: PPCTables) -> Type[BusTableIds | BranchTableIds | GeneratorTableIds | GeneratorCostTableIds]:
+def get_table_ids(table: PPCTables) -> Type[Any]:
     """
     Get the table ids enum corresponding to the given table.
 

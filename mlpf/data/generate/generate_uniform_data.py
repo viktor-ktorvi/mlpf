@@ -2,16 +2,12 @@ import copy
 import warnings
 from typing import Dict, List
 
-import hydra
 import numpy as np
-import pandapower as pp
-import pandapower.networks as pn
 from numpy import ndarray
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from tqdm import tqdm
 
-from mlpf.data.utils.saving import pickle_all
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.generator_table import GeneratorTableIds
 
@@ -83,32 +79,4 @@ def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high:
 
     return random_ppc_list
 
-
 # TODO test to see if the distribution really is uniform with the mean being the original value
-@hydra.main(version_base=None, config_path="configs", config_name="default")
-def main(cfg):
-    """
-    Generate a dataset and save it. Use the hydra config default or overwrite the command line args.
-
-    :param cfg: hydra config
-    :return:
-    """
-    # net = pn.create_kerber_dorfnetz()  # TODO think of an elegant way to choose grids from the command line
-    net = pn.case118()
-    pp.runpp(net)
-    base_ppc = net._ppc
-
-    warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
-
-    uniform_ppc_list = generate_uniform_ppcs(
-        base_ppc,
-        how_many=cfg.how_many,
-        low=cfg.low,
-        high=cfg.high
-    )
-
-    pickle_all(uniform_ppc_list, save_path=cfg.save_path, extension=cfg.extension, delete_all_from_save_path=True)
-
-
-if __name__ == "__main__":
-    main()

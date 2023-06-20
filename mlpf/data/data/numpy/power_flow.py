@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 from numpy import ndarray
-from torch_geometric.data import Data
+from types import SimpleNamespace
 
 from mlpf.data.utils.conversion import ppc2power_flow_arrays
 from mlpf.data.utils.masks import create_feature_mask
@@ -32,7 +32,7 @@ def power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64
 
     edge_attributes = np.vstack((conductances_pu, susceptances_pu))
 
-    return Data(
+    return SimpleNamespace(
         edge_index=edge_index,
         x=PQVA_matrix,
         edge_attr=edge_attributes,
@@ -45,7 +45,7 @@ def power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64
     )
 
 
-def get_power_flow_errors(predictions: ndarray, data: Data) -> Tuple[ndarray, ...]:
+def get_power_flow_errors(predictions: ndarray, data: SimpleNamespace) -> Tuple[ndarray, ...]:
     """
     Take model predictions and merge them with the corresponding data object.
     Calculate the power flow errors for the given predictions.
@@ -74,7 +74,7 @@ def get_power_flow_errors(predictions: ndarray, data: Data) -> Tuple[ndarray, ..
     return active_power_errors, reactive_power_errors, active_powers, reactive_powers
 
 
-def get_relative_power_flow_errors(predictions: ndarray, data: Data) -> Tuple[ndarray, ...]:
+def get_relative_power_flow_errors(predictions: ndarray, data: SimpleNamespace) -> Tuple[ndarray, ...]:
     """
     Take model predictions and merge them with the corresponding data batch.
     Calculate the relative power flow errors for the given predictions.

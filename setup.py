@@ -27,5 +27,5 @@ setup(
     classifiers=classifiers,
     keywords=['machine learning', 'power'],
     packages=find_packages(),
-    install_requires=['numpy', 'pandapower', 'PYPOWER', 'scikit-learn', 'scipy', 'tqdm', 'torchmetrics']
+    install_requires=['numpy', 'pandapower', 'PYPOWER', 'scikit-learn', 'scipy', 'tqdm']
 )

@@ -16,7 +16,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mlpf',
-    version='0.0.5',
+    version='0.0.5.2',
     description='Machine learning for power flow',
     long_description=long_description,
     long_description_content_type='text/markdown',

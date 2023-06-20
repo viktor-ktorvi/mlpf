@@ -8,7 +8,7 @@ from pandapower import from_json
 from tqdm import tqdm
 from typing import Any, Callable, Dict, List
 
-from mlpf.data.utils.conversion import pandapower2ppc_list
+from mlpf.data.conversion.utils import pandapower2ppc_list
 
 
 def load_pickle_ppc(filepath: str) -> Dict:

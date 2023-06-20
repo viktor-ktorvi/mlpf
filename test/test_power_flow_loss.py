@@ -5,7 +5,8 @@ from typing import Dict
 import pandapower as pp
 import torch
 
-from mlpf.data.utils.conversion import ppc2power_flow_tensors, ppc2power_flow_arrays
+from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
+from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.utils.pandapower_networks import get_all_pandapower_networks
 from mlpf.loss.numpy import power_flow as pf_numpy
 from mlpf.loss.torch import power_flow as pf_torch
@@ -41,7 +42,6 @@ def numpy_get_power_flow_loss(ppc: Dict, method="sparse") -> float:
 
     :param ppc: pypower case format
     :param method: To use scatter operations on arrays or to multiply with sparse matrices.
-    :param dtype: torch data type
     :return: loss
     """
     edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad, conductances_pu, susceptances_pu = ppc2power_flow_arrays(ppc)

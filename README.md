@@ -48,17 +48,18 @@ ppc, converged = runpf(copy.deepcopy(ppc), ppopt=ppopt)
 #### numpy / scikit-learn
 
 ```python
-from mlpf.data.utils.conversion import ppc2power_flow_arrays
+
+from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.loss.numpy.power_flow import power_flow_errors
 
 edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad, conductances_pu, susceptances_pu = ppc2power_flow_arrays(ppc)
 
 active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
-    edge_index,
-    active_powers_pu,
-    reactive_powers_pu,
-    voltages_pu, angles_rad,
-    conductances_pu,
+  edge_index,
+  active_powers_pu,
+  reactive_powers_pu,
+  voltages_pu, angles_rad,
+  conductances_pu,
     susceptances_pu
 )
 ```
@@ -66,19 +67,20 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
 #### torch
 
 ```python
-from mlpf.data.utils.conversion import ppc2power_flow_tensors
+
+from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
 from mlpf.loss.torch.power_flow import power_flow_errors
 
 # note: going from float64(standard in PYPOWER) to float32(standard in torch) will increase the PF loss significantly
 edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad, conductances_pu, susceptances_pu = ppc2power_flow_tensors(ppc, dtype=torch.float64)
 
 active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
-    edge_index,
-    active_powers_pu,
-    reactive_powers_pu,
-    voltages_pu, angles_rad,
-    conductances_pu,
-    susceptances_pu
+  edge_index,
+  active_powers_pu,
+  reactive_powers_pu,
+  voltages_pu, angles_rad,
+  conductances_pu,
+  susceptances_pu
 )
 ```
 

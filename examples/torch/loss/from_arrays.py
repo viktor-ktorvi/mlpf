@@ -7,7 +7,7 @@ import pandapower.networks as pn
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 
-from mlpf.data.utils.conversion import ppc2power_flow_tensors
+from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
 from mlpf.loss.torch.power_flow import power_flow_errors
 
 net = pn.case118()

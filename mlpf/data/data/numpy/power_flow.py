@@ -5,7 +5,7 @@ import numpy as np
 from numpy import ndarray
 from types import SimpleNamespace
 
-from mlpf.data.utils.conversion import ppc2power_flow_arrays
+from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.utils.masks import create_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds

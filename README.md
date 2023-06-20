@@ -60,7 +60,7 @@ active_power_losses_pu, reactive_power_losses_pu = power_flow_errors(
   reactive_powers_pu,
   voltages_pu, angles_rad,
   conductances_pu,
-    susceptances_pu
+  susceptances_pu
 )
 ```
 

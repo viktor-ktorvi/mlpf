@@ -9,7 +9,7 @@ from mlpf.data.utils.masks import create_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.relative_values import relative_values
-from mlpf.loss.torch.power_flow import power_flow_errors
+from mlpf.loss.torch.power_flow import active_power_errors, reactive_power_errors
 from mlpf.utils.ppc import ppc_runpf
 
 
@@ -44,35 +44,6 @@ def power_flow_data(ppc: dict, solve: bool = False, dtype: torch.dtype = torch.f
     )
 
 
-def get_power_flow_errors(predictions: Tensor, batch: Data) -> Tuple[Tensor, ...]:
-    """
-    Take model predictions and merge them with the corresponding data batch.
-    Calculate the power flow errors for the given predictions.
-
-    :param predictions: Power flow unknown variable predictions.
-    :param batch: Data batch from which the predictions came from.
-    :return: (active power errors, reactive power errors, active power, reactive power)
-    """
-
-    PQVA_matrix_prediction = batch.PQVA_matrix.detach().clone()  # deep copy
-    PQVA_matrix_prediction[~batch.feature_mask] = predictions.flatten()
-
-    active_powers = PQVA_matrix_prediction[:, PowerFlowFeatureIds.active_power]
-    reactive_powers = PQVA_matrix_prediction[:, PowerFlowFeatureIds.reactive_power]
-
-    active_power_errors, reactive_power_errors = power_flow_errors(
-        edge_index=batch.edge_index,
-        active_powers=active_powers,
-        reactive_powers=reactive_powers,
-        voltages=PQVA_matrix_prediction[:, PowerFlowFeatureIds.voltage_magnitude],
-        angles_rad=PQVA_matrix_prediction[:, PowerFlowFeatureIds.voltage_angle],
-        conductances=batch.conductances_pu,
-        susceptances=batch.susceptances_pu
-    )
-
-    return active_power_errors, reactive_power_errors, active_powers, reactive_powers
-
-
 def get_relative_power_flow_errors(predictions: Tensor, batch: Data) -> Tuple[Tensor, ...]:
     """
     Take model predictions and merge them with the corresponding data batch.
@@ -82,9 +53,31 @@ def get_relative_power_flow_errors(predictions: Tensor, batch: Data) -> Tuple[Te
     :param batch: Data batch from which the predictions came from.
     :return: (relative active power errors, relative reactive power errors)
     """
-    active_power_errors, reactive_power_errors, active_powers, reactive_powers = get_power_flow_errors(predictions, batch)
 
-    relative_active_power_errors = torch.abs(relative_values(active_power_errors, active_powers))
-    relative_reactive_power_errors = torch.abs(relative_values(reactive_power_errors, reactive_powers))
+    PQVA_matrix_prediction = batch.PQVA_matrix.detach().clone()  # deep copy
+    PQVA_matrix_prediction[~batch.feature_mask] = predictions.flatten()
+
+    active_powers = PQVA_matrix_prediction[:, PowerFlowFeatureIds.active_power]
+    reactive_powers = PQVA_matrix_prediction[:, PowerFlowFeatureIds.reactive_power]
+
+    voltage_magnitudes = PQVA_matrix_prediction[:, PowerFlowFeatureIds.voltage_magnitude]
+    angles_rad = PQVA_matrix_prediction[:, PowerFlowFeatureIds.voltage_angle]
+
+    active_errors = active_power_errors(edge_index=batch.edge_index,
+                                        active_powers=active_powers,
+                                        voltages=voltage_magnitudes,
+                                        angles_rad=angles_rad,
+                                        conductances=batch.conductances_pu,
+                                        susceptances=batch.susceptances_pu)
+
+    reactive_errors = reactive_power_errors(edge_index=batch.edge_index,
+                                            reactive_powers=reactive_powers,
+                                            voltages=voltage_magnitudes,
+                                            angles_rad=angles_rad,
+                                            conductances=batch.conductances_pu,
+                                            susceptances=batch.susceptances_pu)
+
+    relative_active_power_errors = torch.abs(relative_values(active_errors, active_powers))
+    relative_reactive_power_errors = torch.abs(relative_values(reactive_errors, reactive_powers))
 
     return relative_active_power_errors, relative_reactive_power_errors

@@ -54,7 +54,9 @@ def get_relative_power_flow_errors(predictions: Tensor, batch: Data) -> Tuple[Te
     :return: (relative active power errors, relative reactive power errors)
     """
 
-    PQVA_matrix_prediction = batch.PQVA_matrix.detach().clone()  # deep copy
+    PQVA_matrix_prediction = torch.zeros_like(batch.PQVA_matrix)
+
+    PQVA_matrix_prediction[batch.feature_mask] = batch.PQVA_matrix[batch.feature_mask]
     PQVA_matrix_prediction[~batch.feature_mask] = predictions.flatten()
 
     active_powers = PQVA_matrix_prediction[:, PowerFlowFeatureIds.active_power]

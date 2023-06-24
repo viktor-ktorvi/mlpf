@@ -1,6 +1,9 @@
 from typing import Any
 
 import numpy as np
+import torch
+from numpy import ndarray
+from torch import Tensor
 
 
 def relative_values(numerator: Any, denominator: Any, eps: float = 1e-9, fill: bool = True):
@@ -16,7 +19,12 @@ def relative_values(numerator: Any, denominator: Any, eps: float = 1e-9, fill: b
     returns a 0 relative value.
     :return: Relative values.
     """
-    zero_denominator_mask = np.abs(denominator) < eps
+    if type(denominator) == ndarray:
+        zero_denominator_mask = np.abs(denominator) < eps
+    elif type(denominator) == Tensor:
+        zero_denominator_mask = torch.abs(denominator) < eps
+    else:
+        raise TypeError(f"Expected types 'ndarray' or 'Tensor' but got {type(denominator)} instead.")
 
     if fill:
         denominator[zero_denominator_mask] = 1.0

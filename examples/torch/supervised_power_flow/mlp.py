@@ -1,10 +1,8 @@
-import torch
-
 import pandapower as pp
 import pandapower.networks as pn
+import torch
 import torch.nn as nn
 import torch_geometric as pyg
-
 from pandas.io.json._normalize import nested_to_record
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
@@ -15,7 +13,7 @@ from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
-from mlpf.loss.torch.metrics.power_flow import RelativePowerFlowError
+from mlpf.loss.torch.metrics.power_flow import MeanActivePowerError, MeanRelativeActivePowerError
 from mlpf.utils.standard_scaler import StandardScaler
 
 
@@ -78,13 +76,15 @@ def main():
     metrics_train = MetricCollection(
         MeanSquaredError(),
         R2Score(num_outputs=output_size),
-        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+        MeanActivePowerError(),
+        MeanRelativeActivePowerError()
     ).to(device)
 
     metrics_val = MetricCollection(
         MeanSquaredError(),
         R2Score(num_outputs=output_size),
-        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+        MeanActivePowerError(),
+        MeanRelativeActivePowerError()
     ).to(device)
 
     progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")
@@ -94,9 +94,10 @@ def main():
         # Training
         model.train()
         for batch in train_loader:
+            batch = batch.to(device)
             features, targets = batch.feature_vector, batch.target_vector
-            features = features.to(device)
-            targets = targets.to(device)
+            # features = features.to(device)
+            # targets = targets.to(device)
 
             optimizer.zero_grad()
 
@@ -113,9 +114,10 @@ def main():
 
             model.eval()
             for batch in val_loader:
+                batch = batch.to(device)
                 features, targets = batch.feature_vector, batch.target_vector
-                features = features.to(device)
-                targets = targets.to(device)
+                # features = features.to(device)
+                # targets = targets.to(device)
 
                 predictions = model(features)
 

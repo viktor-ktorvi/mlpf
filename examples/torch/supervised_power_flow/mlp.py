@@ -3,7 +3,6 @@ import pandapower.networks as pn
 import torch
 import torch.nn as nn
 import torch_geometric as pyg
-from pandas.io.json._normalize import nested_to_record
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from sklearn.model_selection import train_test_split
@@ -74,6 +73,8 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
 
+    # Metrics
+
     metrics_train = MetricCollection(
         MeanSquaredError(),
         R2Score(num_outputs=output_size),
@@ -101,8 +102,6 @@ def main():
         for batch in train_loader:
             batch = batch.to(device)
             features, targets = batch.feature_vector, batch.target_vector
-            # features = features.to(device)
-            # targets = targets.to(device)
 
             optimizer.zero_grad()
 
@@ -121,15 +120,13 @@ def main():
             for batch in val_loader:
                 batch = batch.to(device)
                 features, targets = batch.feature_vector, batch.target_vector
-                # features = features.to(device)
-                # targets = targets.to(device)
 
                 predictions = model(features)
 
                 metrics_val(preds=predictions, target=output_scaler(targets), preds_pf=output_scaler.inverse(predictions), batch=batch)
 
-        overall_metrics_train = nested_to_record(metrics_train.compute(), sep='_')
-        overall_metrics_val = nested_to_record(metrics_val.compute(), sep='_')
+        overall_metrics_train = metrics_train.compute()
+        overall_metrics_val = metrics_val.compute()
 
         description = "Training | Validation:"
 

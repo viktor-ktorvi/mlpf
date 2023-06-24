@@ -1,9 +1,10 @@
 import copy
-from types import SimpleNamespace
-from typing import Tuple
 
 import numpy as np
+
 from numpy import ndarray
+from types import SimpleNamespace
+from typing import Tuple
 
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.utils.masks import create_feature_mask

@@ -99,8 +99,15 @@ print(f"Total Q loss = {torch.sum(reactive_errors):.3e} p.u.")
 ##### Power flow
 
 * [scikit-learn linear regression](examples/sklearn/supervised_power_flow/linear_regression.py)
-* [torch linear regression](examples/torch/supervised_power_flow/mlp.py)
+* [torch MLP(multilayer perceptron)](examples/torch/supervised_power_flow/mlp.py)
 * [torch GCN(graph convolutional network)](examples/torch/supervised_power_flow/gcn.py)
+
+#### Supervised learning
+
+##### Power flow
+
+* [torch MLP(multilayer perceptron](examples/torch/unsupervised_power_flow/mlp.py)
+* [torch GCN(graph convolutional network)](examples/torch/unsupervised_power_flow/gcn.py)
 
 ### Development
 

@@ -1,4 +1,5 @@
 import torch
+
 from torch import Tensor
 
 from torch_scatter import scatter_sum

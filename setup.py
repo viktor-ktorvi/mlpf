@@ -16,7 +16,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mlpf',
-    version='0.0.6',
+    version='0.0.7',
     description='Machine learning for power flow',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,7 +25,7 @@ setup(
     author_email='todosijevicviktor998@gmail.com',
     license='MIT',
     classifiers=classifiers,
-    keywords=['machine learning', 'power'],
+    keywords=['machine learning', 'power flow'],
     packages=find_packages(),
     install_requires=['numpy', 'pandapower', 'PYPOWER', 'scikit-learn', 'scipy', 'tqdm']
 )

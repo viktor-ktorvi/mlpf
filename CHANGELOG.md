@@ -13,7 +13,7 @@ Add README.md as long description in PyPi.
 * Configure setup.py such that `pip install mlpf` works.
 * Separate torch and numpy in data conversion
 
-## 0.0.7(??/??/2023)
+## 0.0.7(24/06/2023)
 
 * Refactor power flow errors in such a way that the calculation is now
   separate for active and reactive power decoupling them

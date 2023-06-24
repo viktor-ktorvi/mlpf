@@ -1,8 +1,10 @@
+import torch
+
 import pandapower as pp
 import pandapower.networks as pn
-import torch
 import torch.nn as nn
 import torch_geometric as pyg
+
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from sklearn.model_selection import train_test_split

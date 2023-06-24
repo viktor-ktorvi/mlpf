@@ -1,8 +1,9 @@
 import copy
+import torch
 
 import pandapower as pp
 import pandapower.networks as pn
-import torch
+
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 

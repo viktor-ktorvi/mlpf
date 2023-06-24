@@ -132,7 +132,7 @@ def main():
             loss = criterion(predictions, output_scaler(batch.target_vector))
             loss.backward()
 
-            metrics_train(preds=predictions, target=output_scaler(batch.target_vector), preds_pf=output_scaler.inverse(predictions), batch=batch)
+            metrics_train(preds=predictions, target=output_scaler(batch.target_vector), power_flow_predictions=output_scaler.inverse(predictions), batch=batch)
 
             optimizer.step()
 
@@ -145,7 +145,7 @@ def main():
 
                 predictions = model(batch)
 
-                metrics_val(preds=predictions, target=output_scaler(batch.target_vector), preds_pf=output_scaler.inverse(predictions), batch=batch)
+                metrics_val(preds=predictions, target=output_scaler(batch.target_vector), power_flow_predictions=output_scaler.inverse(predictions), batch=batch)
 
         overall_metrics_train = metrics_train.compute()
         overall_metrics_val = metrics_val.compute()

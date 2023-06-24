@@ -26,8 +26,8 @@ class MeanActivePowerError(Metric):
 
         self.add_state("node_count", default=torch.tensor(0))
 
-    def update(self, preds_pf: Tensor, batch: Data):
-        self.PQVA_matrix_prediction = incorporate_predictions(preds_pf, batch)
+    def update(self, power_flow_predictions: Tensor, batch: Data):
+        self.PQVA_matrix_prediction = incorporate_predictions(power_flow_predictions, batch)
 
         self.active_errors = active_power_errors(edge_index=batch.edge_index,
                                                  active_powers=self.PQVA_matrix_prediction[:, PowerFlowFeatureIds.active_power],
@@ -59,8 +59,8 @@ class MeanRelativeActivePowerError(Metric):
 
         self.add_state("node_count", default=torch.tensor(0))
 
-    def update(self, preds_pf: Tensor, batch: Data):
-        self.PQVA_matrix_prediction = incorporate_predictions(preds_pf, batch)
+    def update(self, power_flow_predictions: Tensor, batch: Data):
+        self.PQVA_matrix_prediction = incorporate_predictions(power_flow_predictions, batch)
 
         self.active_errors = active_power_errors(edge_index=batch.edge_index,
                                                  active_powers=self.PQVA_matrix_prediction[:, PowerFlowFeatureIds.active_power],

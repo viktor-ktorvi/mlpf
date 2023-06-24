@@ -9,7 +9,7 @@ from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
-from torchmetrics import MetricCollection, MeanSquaredError, R2Score
+from torchmetrics import MetricCollection
 from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data
@@ -98,7 +98,7 @@ def main():
             optimizer.zero_grad()
 
             predictions = model(batch.feature_vector)
-            batch_metrics = metrics_train(preds_pf=predictions, batch=batch)
+            batch_metrics = metrics_train(power_flow_predictions=predictions, batch=batch)
 
             loss = batch_metrics['MeanActivePowerError'] + batch_metrics['MeanReactivePowerError']
             loss.backward()
@@ -114,7 +114,7 @@ def main():
 
                 predictions = model(batch.feature_vector)
 
-                metrics_val(preds_pf=predictions, batch=batch)
+                metrics_val(power_flow_predictions=predictions, batch=batch)
 
         overall_metrics_train = metrics_train.compute()
         overall_metrics_val = metrics_val.compute()

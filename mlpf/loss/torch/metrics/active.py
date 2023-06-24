@@ -5,16 +5,8 @@ from torchmetrics import Metric
 
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.relative_values import relative_values
+from mlpf.loss.torch.metrics.utils import incorporate_predictions
 from mlpf.loss.torch.power_flow import active_power_errors
-
-
-def incorporate_predictions(predictions: Tensor, batch: Data):
-    PQVA_matrix_prediction = torch.zeros_like(batch.PQVA_matrix)
-
-    PQVA_matrix_prediction[batch.feature_mask] = batch.PQVA_matrix[batch.feature_mask]
-    PQVA_matrix_prediction[~batch.feature_mask] = predictions.flatten()
-
-    return PQVA_matrix_prediction
 
 
 class MeanActivePowerError(Metric):

@@ -1,10 +1,8 @@
-import torch
-
 import pandapower as pp
 import pandapower.networks as pn
+import torch
 import torch.nn as nn
 import torch_geometric as pyg
-
 from pandas.io.json._normalize import nested_to_record
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
@@ -15,7 +13,7 @@ from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
-from mlpf.loss.torch.metrics.power_flow import RelativePowerFlowError
+from mlpf.loss.torch.metrics.active import RelativePowerFlowError
 from mlpf.utils.standard_scaler import StandardScaler
 
 

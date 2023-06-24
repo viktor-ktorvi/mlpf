@@ -13,7 +13,8 @@ from tqdm import tqdm
 
 from mlpf.data.data.torch.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
-from mlpf.loss.torch.metrics.active import RelativePowerFlowError
+from mlpf.loss.torch.metrics.active import MeanActivePowerError, MeanRelativeActivePowerError
+from mlpf.loss.torch.metrics.reactive import MeanReactivePowerError, MeanRelativeReactivePowerError
 from mlpf.utils.standard_scaler import StandardScaler
 
 
@@ -98,13 +99,19 @@ def main():
     metrics_train = MetricCollection(
         MeanSquaredError(),
         R2Score(num_outputs=output_size),
-        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+        MeanActivePowerError(),
+        MeanRelativeActivePowerError(),
+        MeanReactivePowerError(),
+        MeanRelativeReactivePowerError()
     ).to(device)
 
     metrics_val = MetricCollection(
         MeanSquaredError(),
         R2Score(num_outputs=output_size),
-        RelativePowerFlowError(active_str="rel P", reactive_str="rel Q")
+        MeanActivePowerError(),
+        MeanRelativeActivePowerError(),
+        MeanReactivePowerError(),
+        MeanRelativeReactivePowerError()
     ).to(device)
 
     progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")

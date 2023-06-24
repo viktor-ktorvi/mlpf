@@ -10,6 +10,12 @@ from mlpf.loss.torch.power_flow import reactive_power_errors
 
 
 class MeanReactivePowerError(Metric):
+    """
+    A TorchMetric class for calculating the average absolute reactive power flow error.
+
+    TODO Latex
+    """
+
     def __init__(self):
         super(MeanReactivePowerError, self).__init__()
 
@@ -37,6 +43,12 @@ class MeanReactivePowerError(Metric):
 
 
 class MeanRelativeReactivePowerError(Metric):
+    """
+    A TorchMetric class for calculating the average relative absolute reactive power flow error.
+
+    TODO Latex
+    """
+
     def __init__(self):
         super(MeanRelativeReactivePowerError, self).__init__()
 

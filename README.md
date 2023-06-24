@@ -32,8 +32,6 @@ and optionally [TorchMetrics](https://torchmetrics.readthedocs.io/en/stable/).
 3. Feed that data into your ML (scikit-learn or torch) models and use our tried and tested loss functions to train, validate or monitor your model development.
 
 ```python
-import copy
-
 import pandapower as pp
 import pandapower.networks as pn
 
@@ -45,7 +43,7 @@ net = pn.case118()
 ppc = pp.converter.to_ppc(net, init="flat")
 
 ppopt = ppoption(OUT_ALL=0, VERBOSE=0)
-ppc, converged = runpf(copy.deepcopy(ppc), ppopt=ppopt)
+ppc, converged = runpf(ppc, ppopt=ppopt)
 ```
 
 ### Loss

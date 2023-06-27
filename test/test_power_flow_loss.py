@@ -63,8 +63,6 @@ class TestPowerFlowLoss(unittest.TestCase):
         tolerance_VA = 1  # P error + Q error on entire grid in Volt-Amps
 
         for net in nets:
-            print(net)
-
             ppc = pp.converter.to_ppc(net, init="flat")
             ppc, converged = runpf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
 

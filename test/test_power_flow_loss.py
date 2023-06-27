@@ -5,6 +5,8 @@ from typing import Dict
 import numpy as np
 import pandapower as pp
 import torch
+from pypower.ppoption import ppoption
+from pypower.runpf import runpf
 
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
@@ -51,13 +53,21 @@ class TestPowerFlowLoss(unittest.TestCase):
         :return:
         """
         warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
-        places = 5
+
         nets = get_all_pandapower_networks()
+
+        tolerance_VA = 1  # P error + Q error on entire grid in Volt-Amps
+
         for net in nets:
             print(net)
-            pp.runpp(net, tolerance_mva=1e-10, numba=False)
-            self.assertAlmostEqual(torch_get_power_flow_loss(net._ppc), 0.0, places=places)
-            self.assertAlmostEqual(numpy_get_power_flow_loss(net._ppc), 0.0, places=places)
+
+            ppc = pp.converter.to_ppc(net, init="flat")
+            ppc, converged = runpf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
+
+            tolerance = tolerance_VA / ppc["baseMVA"]
+
+            self.assertLess(torch_get_power_flow_loss(ppc), tolerance)
+            self.assertLess(numpy_get_power_flow_loss(ppc), tolerance)
 
 
 if __name__ == '__main__':

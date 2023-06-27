@@ -3,7 +3,7 @@ import numpy as np
 from numpy import ndarray
 
 
-def upper_bound_error(value: ndarray, value_max: ndarray) -> ndarray:
+def upper_bound_errors(value: ndarray, value_max: ndarray) -> ndarray:
     """
     Return the difference between the value and its maximum value if the value is larger than the maximum value, otherwise return 0.
 
@@ -14,7 +14,7 @@ def upper_bound_error(value: ndarray, value_max: ndarray) -> ndarray:
     return np.maximum(np.zeros_like(value), value - value_max)
 
 
-def lower_bound_error(value: ndarray, value_min: ndarray) -> ndarray:
+def lower_bound_errors(value: ndarray, value_min: ndarray) -> ndarray:
     """
     Return the difference between the value and its minimum value if the value is smaller than the minimum value, otherwise return 0.
 
@@ -32,8 +32,8 @@ def main():
     upper_bound = np.cos(4 * x) + offset
     lower_bound = np.sin(4 * x) - 2 + offset
 
-    upper_error = upper_bound_error(values, upper_bound)
-    lower_error = lower_bound_error(values, lower_bound)
+    upper_error = upper_bound_errors(values, upper_bound)
+    lower_error = lower_bound_errors(values, lower_bound)
     upper_bound_mask = upper_error > 0
     lower_bound_mask = lower_error < 0
 

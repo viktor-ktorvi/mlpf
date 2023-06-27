@@ -9,6 +9,7 @@ import pandapower.networks as pn
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from typing import Dict
+from tqdm import tqdm
 
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
@@ -62,7 +63,7 @@ class TestPowerFlowLoss(unittest.TestCase):
 
         tolerance_VA = 1  # P error + Q error on entire grid in Volt-Amps
 
-        for net in nets:
+        for net in tqdm(nets, ascii=True, desc="Multiple topologies"):
             ppc = pp.converter.to_ppc(net, init="flat")
             ppc, converged = runpf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
 
@@ -92,7 +93,7 @@ class TestPowerFlowLoss(unittest.TestCase):
         tolerance_VA = 1  # P error + Q error on entire grid in Volt-Amps
         tolerance = tolerance_VA / base_ppc["baseMVA"]
 
-        for ppc in ppc_list:
+        for ppc in tqdm(ppc_list, ascii=True, desc="Single topology"):
             self.assertLess(torch_get_power_flow_loss(ppc), tolerance)
             self.assertLess(numpy_get_power_flow_loss(ppc), tolerance)
 

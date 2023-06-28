@@ -3,7 +3,7 @@ import torch
 from torch_geometric.data import Data
 
 from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
-from mlpf.data.utils.masks import create_feature_mask
+from mlpf.data.masks.power_flow import create_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.utils.ppc import ppc_runpf
 

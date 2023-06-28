@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from typing import Tuple
 
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
-from mlpf.data.utils.masks import create_feature_mask
+from mlpf.data.masks.power_flow import create_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.numpy.power_flow import active_power_errors, reactive_power_errors

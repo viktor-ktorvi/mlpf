@@ -1,7 +1,7 @@
-from typing import Final, List
-
 import numpy as np
+
 from numpy import ndarray
+from typing import Final, List
 
 from mlpf.enumerations.bus_type import BusTypeIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds

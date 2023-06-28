@@ -1,21 +1,24 @@
 import copy
 import warnings
-from typing import Dict, List
 
 import numpy as np
+
 from numpy import ndarray
 from pypower.ppoption import ppoption
+from pypower.runopf import runopf
 from pypower.runpf import runpf
 from tqdm import tqdm
+from typing import Dict, List
 
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.enumerations.generator_table import GeneratorTableIds
 
 
-def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high: float = 1.1) -> List[Dict]:
+def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high: float = 1.1, method: str = "pf") -> List[Dict]:
     """
     Generate a list of ppcs for which the values of bus[active power, reactive power, voltage magnitude, voltage angle]
-    and gen[active power, reactive power] is uniformly distributed around those same values in base_ppc. The ppcs come with a solved power flow.
+    and gen[active power, reactive power] are uniformly distributed around those same values in base_ppc. The ppcs come with a solved (optimal) power flow,
+    depending on the arguments.
 
     TODO add latex value~U(low*base_value, high*base_value)
 
@@ -24,7 +27,8 @@ def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high:
     :param how_many: How many ppcs to generate.
     :param low: Low value multiplier in the uniform distribution.
     :param high: High value multiplier in the uniform distribution.
-    :return: List of ppcs
+    :param method: "pf" or "opf". Default "pf".
+    :return: List of PPCs.
     """
     warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
 
@@ -72,8 +76,17 @@ def generate_uniform_ppcs(base_ppc: Dict, how_many: int, low: float = 0.9, high:
             for gen_variable in gen_variables:
                 random_ppc["gen"][:, gen_variable] = gen_distribution_parameters[gen_variable].sample(random_ppc["gen"].shape[0])
 
-            ppopt = ppoption(OUT_ALL=0, VERBOSE=0)
-            solved_random_ppc, converged = runpf(random_ppc, ppopt=ppopt)
+            if method == "pf":
+                ppopt = ppoption(OUT_ALL=0, VERBOSE=0)
+                solved_random_ppc, converged = runpf(random_ppc, ppopt=ppopt)
+
+            elif method == "opf":
+                ppopt = ppoption(OUT_ALL=0, VERBOSE=0)
+                solved_random_ppc = runopf(random_ppc, ppopt=ppopt)
+                converged = solved_random_ppc["success"]
+
+            else:
+                raise ValueError(f"Method '{method}' is not supported. Supported methods are 'pf' and 'opf'.")
 
         random_ppc_list.append(solved_random_ppc)
 

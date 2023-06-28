@@ -1,5 +1,7 @@
 how_many: 1234
 
+method: "pf"
+
 low: 0.9
 high: 1.1
 

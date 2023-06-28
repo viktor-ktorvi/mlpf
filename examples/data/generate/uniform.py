@@ -1,8 +1,11 @@
+import copy
 import warnings
 
 import hydra
 import pandapower as pp
 import pandapower.networks as pn
+from pypower.ppoption import ppoption
+from pypower.runopf import runopf
 
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.data.utils.saving import pickle_all
@@ -18,8 +21,9 @@ def main(cfg):
     """
     # net = pn.create_kerber_dorfnetz()  # TODO think of an elegant way to choose grids from the command line
     net = pn.case118()
-    pp.runpp(net)
-    base_ppc = net._ppc
+    base_ppc = pp.converter.to_ppc(net, init="flat")
+    ppopt = ppoption(OUT_ALL=0, VERBOSE=0)
+    base_ppc = runopf(copy.deepcopy(base_ppc), ppopt=ppopt)
 
     warnings.filterwarnings("ignore", message="Casting complex values to real discards the imaginary part")
 
@@ -27,7 +31,8 @@ def main(cfg):
         base_ppc,
         how_many=cfg.how_many,
         low=cfg.low,
-        high=cfg.high
+        high=cfg.high,
+        method=cfg.method
     )
 
     pickle_all(uniform_ppc_list, save_path=cfg.save_path, extension=cfg.extension, delete_all_from_save_path=True)

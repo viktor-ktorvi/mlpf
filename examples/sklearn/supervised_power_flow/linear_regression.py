@@ -5,7 +5,6 @@ import pandapower as pp
 import pandapower.networks as pn
 import pandas as pd
 
-from pandas import DataFrame
 from pypower.ppoption import ppoption
 from pypower.runpf import runpf
 from sklearn.linear_model import LinearRegression
@@ -14,8 +13,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-from mlpf.data.data.numpy.power_flow import power_flow_data, get_relative_power_flow_errors
+from mlpf.data.data.numpy.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
+from mlpf.loss.numpy.metrics.active import ActivePowerError, RelativeActivePowerError
+from mlpf.loss.numpy.metrics.metrics import MultipleMetrics
+from mlpf.loss.numpy.metrics.reactive import ReactivePowerError, RelativeReactivePowerError
 
 
 def main():
@@ -64,27 +66,23 @@ def main():
     print(f"Train R2 score = {model.score(features_train, targets_train)}")
     print(f"Val R2 score = {model.score(features_val, targets_val)}\n")
 
-    val_predictions = model.predict(features_val)
+    predictions_val = model.predict(features_val)
 
-    # power flow evaluation
-    relative_active_power_errors_list = []
-    relative_reactive_power_errors_list = []
-
-    for i in range(val_predictions.shape[0]):
-        relative_active_power_errors, relative_reactive_power_errors = get_relative_power_flow_errors(val_predictions[i], data_val[i])
-
-        relative_active_power_errors_list.append(relative_active_power_errors)
-        relative_reactive_power_errors_list.append(relative_reactive_power_errors)
-
-    rel_errors_df = DataFrame(
-        data=np.vstack(
-            (np.array(relative_active_power_errors_list).flatten(),
-             np.array(relative_reactive_power_errors_list).flatten())).T,
-        columns=["relative active power error", "relative reactive power error"]
+    power_metrics = MultipleMetrics(
+        ActivePowerError(),
+        ReactivePowerError(),
+        RelativeActivePowerError(),
+        RelativeReactivePowerError()
     )
 
-    pd.set_option('display.float_format', lambda x: "{:2.4f} ".format(x))
-    print(rel_errors_df.describe())
+    for i in tqdm(range(predictions_val.shape[0]), ascii=True, desc="Calculating metrics"):
+        power_metrics.update(predictions_val[i], data_val[i])
+
+    pd.set_option('display.width', 1000)
+    pd.set_option('display.max_columns', 1000)
+
+    pd.set_option('display.float_format', lambda x: "{:2.5f} ".format(x))
+    print(power_metrics.compute().describe())
 
 
 if __name__ == "__main__":

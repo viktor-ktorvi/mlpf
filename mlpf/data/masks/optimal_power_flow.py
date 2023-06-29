@@ -18,7 +18,7 @@ class BusTypeMasks:
     PVAR: Final[List[bool]] = [False, False, False, False]
 
 
-def create_feature_mask(bus_types: ndarray) -> ndarray:
+def create_optimal_power_flow_feature_mask(bus_types: ndarray) -> ndarray:
     """
     Create a feature mask depending on the node types in the (active power, reactive power, voltage magnitude, voltage angle)
     format for optimal power flow.

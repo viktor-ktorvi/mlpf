@@ -3,7 +3,7 @@ import torch
 from torch_geometric.data import Data
 
 from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
-from mlpf.data.masks.power_flow import create_feature_mask
+from mlpf.data.masks.power_flow import create_power_flow_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 from mlpf.utils.ppc import ppc_runpf
 
@@ -22,7 +22,7 @@ def power_flow_data(ppc: dict, solve: bool = False, dtype: torch.dtype = torch.f
     edge_index, active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad, conductances_pu, susceptances_pu = ppc2power_flow_tensors(ppc, dtype=dtype)
 
     PQVA_matrix = torch.vstack((active_powers_pu, reactive_powers_pu, voltages_pu, angles_rad)).T
-    feature_mask = torch.BoolTensor(create_feature_mask(ppc["bus"][:, BusTableIds.bus_type]))
+    feature_mask = torch.BoolTensor(create_power_flow_feature_mask(ppc["bus"][:, BusTableIds.bus_type]))
 
     edge_attributes = torch.vstack((conductances_pu, susceptances_pu))
 

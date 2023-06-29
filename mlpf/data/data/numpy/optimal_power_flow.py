@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from mlpf.data.conversion.numpy.optimal_power_flow import ppc2optimal_power_flow_arrays
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
-from mlpf.data.masks.optimal_power_flow import create_feature_mask
+from mlpf.data.masks.optimal_power_flow import create_optimal_power_flow_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 
 
@@ -42,7 +42,7 @@ def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np
         cost_coefficients
     ))
 
-    feature_mask = create_feature_mask(ppc["bus"][:, BusTableIds.bus_type])  # PQVA mask
+    feature_mask = create_optimal_power_flow_feature_mask(ppc["bus"][:, BusTableIds.bus_type])  # PQVA mask
     feature_vector = np.hstack((PQVA_matrix, opf_features_matrix))[np.hstack((feature_mask, np.ones(shape=opf_features_matrix.shape, dtype=bool)))]
 
     edge_attributes = np.vstack((conductances_pu, susceptances_pu))

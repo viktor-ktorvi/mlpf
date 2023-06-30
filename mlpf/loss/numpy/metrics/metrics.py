@@ -6,8 +6,8 @@ from numpy import ndarray
 from pandas import DataFrame
 from typing import Union
 
-from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
-from mlpf.data.data.numpy.power_flow import PowerFlowData
+from mlpf.data.data.optimal_power_flow import OptimalPowerFlowData
+from mlpf.data.data.power_flow import PowerFlowData
 
 
 class BaseMetric(abc.ABC):

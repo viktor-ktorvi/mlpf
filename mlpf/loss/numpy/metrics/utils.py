@@ -3,8 +3,8 @@ import numpy as np
 from numpy import ndarray
 from typing import Union
 
-from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
-from mlpf.data.data.numpy.power_flow import PowerFlowData
+from mlpf.data.data.optimal_power_flow import OptimalPowerFlowData
+from mlpf.data.data.power_flow import PowerFlowData
 
 
 def incorporate_predictions(predictions: ndarray, data: Union[PowerFlowData, OptimalPowerFlowData]):

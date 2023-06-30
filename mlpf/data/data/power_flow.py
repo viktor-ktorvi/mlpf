@@ -1,7 +1,10 @@
+import torch
+
 import numpy as np
 
 from dataclasses import dataclass
 from numpy import ndarray
+from torch_geometric.data import Data
 
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
 from mlpf.data.masks.power_flow import create_power_flow_feature_mask
@@ -25,6 +28,19 @@ class PowerFlowData:
     susceptances_pu: ndarray
     target_vector: ndarray
     x: ndarray
+
+    def to_pyg_data(self, dtype: torch.dtype = torch.float32) -> Data:
+        return Data(
+            PQVA_matrix=torch.tensor(self.PQVA_matrix, dtype=dtype),
+            conductances_pu=torch.tensor(self.conductances_pu, dtype=dtype),
+            edge_attr=torch.tensor(self.edge_attr, dtype=dtype),
+            edge_index=torch.LongTensor(self.edge_index),
+            feature_mask=torch.BoolTensor(self.feature_mask),
+            feature_vector=torch.tensor(self.feature_vector, dtype=dtype).unsqueeze(0),
+            susceptances_pu=torch.tensor(self.susceptances_pu, dtype=dtype),
+            target_vector=torch.tensor(self.target_vector, dtype=dtype).unsqueeze(0),
+            x=torch.tensor(self.x, dtype=dtype)
+        )
 
 
 def power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64) -> PowerFlowData:

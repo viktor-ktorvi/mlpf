@@ -2,7 +2,7 @@ import numpy as np
 
 from numpy import ndarray
 
-from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
+from mlpf.data.data.optimal_power_flow import OptimalPowerFlowData
 from mlpf.enumerations.optimal_power_flow_ids import OptimalPowerFlowFeatureIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.numpy.bound_errors import upper_bound_errors, lower_bound_errors

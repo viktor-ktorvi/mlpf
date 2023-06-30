@@ -1,13 +1,16 @@
+import torch
+
 import numpy as np
 
 from dataclasses import dataclass
 from numpy import ndarray
 from pypower.ppoption import ppoption
 from pypower.runopf import runopf
+from torch_geometric.data import Data
 
 from mlpf.data.conversion.numpy.optimal_power_flow import ppc2optimal_power_flow_arrays
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
-from mlpf.data.data.numpy.power_flow import PowerFlowData
+from mlpf.data.data.power_flow import PowerFlowData
 from mlpf.data.masks.optimal_power_flow import create_optimal_power_flow_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 
@@ -23,6 +26,23 @@ class OptimalPowerFlowData(PowerFlowData):
     opf_features_matrix: ndarray
     target_cost: float
     total_feature_mask: ndarray
+
+    def to_pyg_data(self, dtype: torch.dtype = torch.float32) -> Data:
+        return Data(
+            baseMVA=self.baseMVA,
+            opf_features_matrix=torch.tensor(self.opf_features_matrix, dtype=dtype),
+            target_cost=self.target_cost,
+            total_feature_mask=torch.BoolTensor(self.total_feature_mask),
+            PQVA_matrix=torch.tensor(self.PQVA_matrix, dtype=dtype),
+            conductances_pu=torch.tensor(self.conductances_pu, dtype=dtype),
+            edge_attr=torch.tensor(self.edge_attr, dtype=dtype),
+            edge_index=torch.LongTensor(self.edge_index),
+            feature_mask=torch.BoolTensor(self.feature_mask),
+            feature_vector=torch.tensor(self.feature_vector, dtype=dtype).unsqueeze(0),
+            susceptances_pu=torch.tensor(self.susceptances_pu, dtype=dtype),
+            target_vector=torch.tensor(self.target_vector, dtype=dtype).unsqueeze(0),
+            x=torch.tensor(self.x, dtype=dtype)
+        )
 
 
 def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64) -> OptimalPowerFlowData:

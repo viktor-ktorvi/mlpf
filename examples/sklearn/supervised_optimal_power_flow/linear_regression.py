@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-from mlpf.data.data.numpy.optimal_power_flow import optimal_power_flow_data
+from mlpf.data.data.optimal_power_flow import optimal_power_flow_data
 from mlpf.data.loading.load_data import load_data
 from mlpf.loss.numpy.metrics.active import ActivePowerError, RelativeActivePowerError
 from mlpf.loss.numpy.metrics.bounds.active import UpperActivePowerError, LowerActivePowerError

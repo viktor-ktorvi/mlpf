@@ -13,7 +13,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-from mlpf.data.data.numpy.power_flow import power_flow_data
+from mlpf.data.data.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.loss.numpy.metrics.active import ActivePowerError, RelativeActivePowerError
 from mlpf.loss.numpy.metrics.metrics import MultipleMetrics

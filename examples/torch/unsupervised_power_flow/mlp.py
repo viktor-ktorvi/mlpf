@@ -12,7 +12,7 @@ from torch_geometric.loader import DataLoader
 from torchmetrics import MetricCollection
 from tqdm import tqdm
 
-from mlpf.data.data.torch.power_flow import power_flow_data
+from mlpf.data.data.power_flow import power_flow_data
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.loss.torch.metrics.active import MeanActivePowerError, MeanRelativeActivePowerError
 from mlpf.loss.torch.metrics.reactive import MeanReactivePowerError, MeanRelativeReactivePowerError
@@ -47,7 +47,7 @@ def main():
     # ppc -> Data
     pf_data_list = []
     for solved_ppc in tqdm(solved_ppc_list, ascii=True, desc="Converting ppcs to data"):
-        pf_data_list.append(power_flow_data(solved_ppc))
+        pf_data_list.append(power_flow_data(solved_ppc).to_pyg_data())
 
     data_train, data_val = train_test_split(pf_data_list, test_size=0.33, random_state=42)
 

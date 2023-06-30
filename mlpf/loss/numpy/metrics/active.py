@@ -1,8 +1,10 @@
 import numpy as np
 
 from numpy import ndarray
-from types import SimpleNamespace
+from typing import Union
 
+from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
+from mlpf.data.data.numpy.power_flow import PowerFlowData
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.numpy.metrics.metrics import BaseMetric
 from mlpf.loss.numpy.metrics.utils import incorporate_predictions
@@ -21,7 +23,7 @@ class ActivePowerError(BaseMetric):
         super(ActivePowerError, self).__init__()
         self.active_power_errors = []
 
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: Union[PowerFlowData, OptimalPowerFlowData]):
         PQVA_matrix_prediction = incorporate_predictions(predictions, data)
 
         self.active_power_errors.append(
@@ -56,7 +58,7 @@ class RelativeActivePowerError(BaseMetric):
         super(RelativeActivePowerError, self).__init__()
         self.relative_active_power_errors = []
 
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: Union[PowerFlowData, OptimalPowerFlowData]):
         PQVA_matrix_prediction = incorporate_predictions(predictions, data)
         rel_errors = relative_values(
             numerator=active_power_errors(

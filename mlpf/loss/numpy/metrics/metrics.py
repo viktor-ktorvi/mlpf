@@ -3,9 +3,11 @@ import abc
 import pandas as pd
 
 from numpy import ndarray
-from types import SimpleNamespace
-
 from pandas import DataFrame
+from typing import Union
+
+from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
+from mlpf.data.data.numpy.power_flow import PowerFlowData
 
 
 class BaseMetric(abc.ABC):
@@ -14,7 +16,7 @@ class BaseMetric(abc.ABC):
     """
 
     @abc.abstractmethod
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: Union[PowerFlowData, OptimalPowerFlowData]):
         """
         Add new prediction sample to the metric.
 
@@ -50,7 +52,7 @@ class MultipleMetrics:
     def __init__(self, *metrics: BaseMetric):
         self.metrics = metrics
 
-    def update(self, predictions, data):
+    def update(self, predictions: ndarray, data: Union[PowerFlowData, OptimalPowerFlowData]):
         for metric in self.metrics:
             metric.update(predictions, data)
 

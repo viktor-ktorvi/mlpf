@@ -1,8 +1,8 @@
 import numpy as np
 
 from numpy import ndarray
-from types import SimpleNamespace
 
+from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
 from mlpf.enumerations.optimal_power_flow_ids import OptimalPowerFlowFeatureIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.numpy.costs import polynomial_costs
@@ -10,7 +10,7 @@ from mlpf.loss.numpy.metrics.metrics import BaseMetric
 from mlpf.loss.numpy.metrics.utils import incorporate_predictions
 
 
-def calculate_cost(PQVA_matrix_prediction: ndarray, data: SimpleNamespace):
+def calculate_cost(PQVA_matrix_prediction: ndarray, data: OptimalPowerFlowData):
     """
     Extract the active powers generation, the cost coefficients and baseMVA and use them to calculate the polynomial cost function value.
 
@@ -39,7 +39,7 @@ class ActivePowerCost(BaseMetric):
         super(ActivePowerCost, self).__init__()
         self.costs = []
 
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: OptimalPowerFlowData):
         PQVA_matrix_prediction = incorporate_predictions(predictions, data)
 
         self.costs.append(calculate_cost(PQVA_matrix_prediction, data))

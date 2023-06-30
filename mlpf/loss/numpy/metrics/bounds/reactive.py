@@ -1,8 +1,8 @@
 import numpy as np
 
 from numpy import ndarray
-from types import SimpleNamespace
 
+from mlpf.data.data.numpy.optimal_power_flow import OptimalPowerFlowData
 from mlpf.enumerations.optimal_power_flow_ids import OptimalPowerFlowFeatureIds
 from mlpf.enumerations.power_flow_ids import PowerFlowFeatureIds
 from mlpf.loss.numpy.bound_errors import upper_bound_errors, lower_bound_errors
@@ -21,7 +21,7 @@ class UpperReactivePowerError(BaseMetric):
         super(UpperReactivePowerError, self).__init__()
         self.upper_reactive_power_errors = []
 
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: OptimalPowerFlowData):
         PQVA_matrix_prediction = incorporate_predictions(predictions, data)
 
         self.upper_reactive_power_errors.append(
@@ -50,7 +50,7 @@ class LowerReactivePowerError(BaseMetric):
         super(LowerReactivePowerError, self).__init__()
         self.lower_reactive_power_errors = []
 
-    def update(self, predictions: ndarray, data: SimpleNamespace):
+    def update(self, predictions: ndarray, data: OptimalPowerFlowData):
         PQVA_matrix_prediction = incorporate_predictions(predictions, data)
 
         self.lower_reactive_power_errors.append(

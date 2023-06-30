@@ -1,16 +1,31 @@
 import numpy as np
 
+from dataclasses import dataclass
+from numpy import ndarray
 from pypower.ppoption import ppoption
 from pypower.runopf import runopf
-from types import SimpleNamespace
 
 from mlpf.data.conversion.numpy.optimal_power_flow import ppc2optimal_power_flow_arrays
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
+from mlpf.data.data.numpy.power_flow import PowerFlowData
 from mlpf.data.masks.optimal_power_flow import create_optimal_power_flow_feature_mask
 from mlpf.enumerations.bus_table import BusTableIds
 
 
-def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64):
+@dataclass
+class OptimalPowerFlowData(PowerFlowData):
+    """
+    A class that holds all the data needed for a machine learning optimal power flow.
+
+    TODO individual field descriptions
+    """
+    baseMVA: float
+    opf_features_matrix: ndarray
+    target_cost: float
+    total_feature_mask: ndarray
+
+
+def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np.float64) -> OptimalPowerFlowData:
     """
     Extract all the data of the optimal power flow problem into a namespace object. The ppc should have a solved optimal power flow;
     otherwise if solve is set to True, and optimal power flow will be run.
@@ -18,7 +33,7 @@ def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np
     :param ppc: PYPOWER case object.
     :param solve: To run an OPF solver or not.
     :param dtype: Data type into which to cast the data.
-    :return: Namespace object.
+    :return: OptimalPowerFlowData object.
     """
     if solve:
         ppc = runopf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
@@ -43,20 +58,25 @@ def optimal_power_flow_data(ppc: dict, solve: bool = False, dtype: np.dtype = np
     ))
 
     feature_mask = create_optimal_power_flow_feature_mask(ppc["bus"][:, BusTableIds.bus_type])  # PQVA mask
-    feature_vector = np.hstack((PQVA_matrix, opf_features_matrix))[np.hstack((feature_mask, np.ones(shape=opf_features_matrix.shape, dtype=bool)))]
+
+    x = np.hstack((PQVA_matrix, opf_features_matrix))
+    total_feature_mask = np.hstack((feature_mask, np.ones(shape=opf_features_matrix.shape, dtype=bool)))
+    feature_vector = x[total_feature_mask]
 
     edge_attributes = np.vstack((conductances_pu, susceptances_pu))
 
-    return SimpleNamespace(
-        edge_index=edge_index,
-        edge_attr=edge_attributes,
+    return OptimalPowerFlowData(
         PQVA_matrix=PQVA_matrix,
-        opf_features_matrix=opf_features_matrix,
-        feature_mask=feature_mask,
+        baseMVA=ppc["baseMVA"],
         conductances_pu=conductances_pu,
-        susceptances_pu=susceptances_pu,
+        edge_attr=edge_attributes,
+        edge_index=edge_index,
+        feature_mask=feature_mask,
         feature_vector=feature_vector,
-        target_vector=PQVA_matrix[~feature_mask],
+        opf_features_matrix=opf_features_matrix,
+        susceptances_pu=susceptances_pu,
         target_cost=ppc["f"],
-        baseMVA=ppc["baseMVA"]
+        target_vector=PQVA_matrix[~feature_mask],
+        total_feature_mask=total_feature_mask,
+        x=x
     )

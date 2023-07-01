@@ -119,10 +119,13 @@ def main():
         overall_metrics_train = metrics_train.compute()
         overall_metrics_val = metrics_val.compute()
 
+        # a nice progress bar
         description = "Training | Validation:"
-
         for key in overall_metrics_train.keys():
-            description += f" {key}: ({overall_metrics_train[key]:2.4f} | {overall_metrics_val[key]:2.4f});"
+            unit = getattr(metrics_train[key], 'unit', None)  # get metric unit if it exists
+            unit_brackets = f" [{unit}]" if unit is not None else ''
+
+            description += f" {key}{unit_brackets}: ({overall_metrics_train[key]:2.4f} | {overall_metrics_val[key]:2.4f});"
 
         progress_bar.set_description(description)
 

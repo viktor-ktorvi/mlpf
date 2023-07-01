@@ -42,6 +42,10 @@ class MeanReactivePowerError(Metric):
     def compute(self) -> Tensor:
         return self.reactive_error_sum / self.node_count
 
+    @property
+    def unit(self) -> str:
+        return "p.u."
+
 
 class MeanRelativeReactivePowerError(Metric):
     """
@@ -74,3 +78,7 @@ class MeanRelativeReactivePowerError(Metric):
 
     def compute(self) -> Tensor:
         return self.relative_reactive_error_sum / self.node_count
+
+    @property
+    def unit(self) -> str:
+        return "ratio"

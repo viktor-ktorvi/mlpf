@@ -25,7 +25,7 @@ def main():
     np.random.seed(123)
     random.seed(123)
 
-    ppc_list = load_data("solved_opf_ppcs_10k", max_samples=10000)
+    ppc_list = load_data("solved_opf_ppcs_case118_10k", max_samples=10000)
 
     # ppc -> Data
     opf_data_list = []

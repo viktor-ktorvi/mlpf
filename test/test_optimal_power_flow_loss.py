@@ -1,10 +1,10 @@
+import torch
 import unittest
 import warnings
 
 import numpy as np
 import pandapower as pp
 import pandapower.networks as pn
-import torch
 
 from pypower.ppoption import ppoption
 from pypower.runopf import runopf
@@ -18,8 +18,9 @@ from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.data.utils.pandapower_networks import get_all_pandapower_networks
 from mlpf.enumerations.gencost_table import GeneratorCostTableIds
-from mlpf.loss.numpy.bound_errors import upper_bound_errors, lower_bound_errors
+from mlpf.loss.numpy import bound_errors as bounds_numpy
 from mlpf.loss.numpy.costs import polynomial_costs as polynomial_costs_numpy
+from mlpf.loss.torch import bound_errors as bounds_torch
 from mlpf.loss.torch.costs import polynomial_costs as polynomial_costs_torch
 
 
@@ -28,14 +29,14 @@ def get_bound_errors_numpy(ppc):
     voltages_min, voltages_max, active_powers_min, active_powers_max, reactive_powers_min, reactive_powers_max, active_power_demands, reactive_power_demands, cost_coefficients = ppc2optimal_power_flow_arrays(
         ppc)
 
-    voltage_upper_errors = upper_bound_errors(voltages, voltages_max)
-    voltage_lower_errors = lower_bound_errors(voltages, voltages_min)
+    voltage_upper_errors = bounds_numpy.upper_bound_errors(voltages, voltages_max)
+    voltage_lower_errors = bounds_numpy.lower_bound_errors(voltages, voltages_min)
 
-    active_upper_errors = upper_bound_errors(active_powers, active_powers_max)
-    active_lower_errors = lower_bound_errors(active_powers, active_powers_min)
+    active_upper_errors = bounds_numpy.upper_bound_errors(active_powers, active_powers_max)
+    active_lower_errors = bounds_numpy.lower_bound_errors(active_powers, active_powers_min)
 
-    reactive_upper_errors = upper_bound_errors(reactive_powers, reactive_powers_max)
-    reactive_lower_errors = lower_bound_errors(reactive_powers, reactive_powers_min)
+    reactive_upper_errors = bounds_numpy.upper_bound_errors(reactive_powers, reactive_powers_max)
+    reactive_lower_errors = bounds_numpy.lower_bound_errors(reactive_powers, reactive_powers_min)
 
     return np.sum(voltage_upper_errors +
                   voltage_lower_errors +
@@ -59,6 +60,28 @@ def get_cost_difference_numpy(ppc):
     total_costs = np.sum(active_power_costs)
 
     return np.abs(total_costs - ppc['f'])
+
+
+def get_bound_errors_torch(ppc):
+    edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances = ppc2power_flow_tensors(ppc, dtype=torch.float64)
+    voltages_min, voltages_max, active_powers_min, active_powers_max, reactive_powers_min, reactive_powers_max, active_power_demands, reactive_power_demands, cost_coefficients = ppc2optimal_power_flow_tensors(
+        ppc, dtype=torch.float64)
+
+    voltage_upper_errors = bounds_torch.upper_bound_errors(voltages, voltages_max)
+    voltage_lower_errors = bounds_torch.lower_bound_errors(voltages, voltages_min)
+
+    active_upper_errors = bounds_torch.upper_bound_errors(active_powers, active_powers_max)
+    active_lower_errors = bounds_torch.lower_bound_errors(active_powers, active_powers_min)
+
+    reactive_upper_errors = bounds_torch.upper_bound_errors(reactive_powers, reactive_powers_max)
+    reactive_lower_errors = bounds_torch.lower_bound_errors(reactive_powers, reactive_powers_min)
+
+    return torch.sum(voltage_upper_errors +
+                     voltage_lower_errors +
+                     active_upper_errors +
+                     active_lower_errors +
+                     reactive_upper_errors +
+                     reactive_lower_errors)
 
 
 def get_cost_difference_torch(ppc):
@@ -106,6 +129,7 @@ class TestOptimalPowerFlowLoss(unittest.TestCase):
             self.assertLess(get_bound_errors_numpy(opf_ppc), tolerance)
 
             self.assertLess(get_cost_difference_torch(opf_ppc), tolerance)
+            self.assertLess(get_bound_errors_torch(opf_ppc), tolerance)
 
     # TODO the PYPOWER opf fails for some reason
     # def test_polynomial_cost_multiple_topologies(self):

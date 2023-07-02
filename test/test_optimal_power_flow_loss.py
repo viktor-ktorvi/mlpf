@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 import pandapower as pp
 import pandapower.networks as pn
+import torch
 
 from pypower.ppoption import ppoption
 from pypower.runopf import runopf
@@ -12,14 +13,17 @@ from tqdm import tqdm
 
 from mlpf.data.conversion.numpy.optimal_power_flow import ppc2optimal_power_flow_arrays
 from mlpf.data.conversion.numpy.power_flow import ppc2power_flow_arrays
+from mlpf.data.conversion.torch.optimal_power_flow import ppc2optimal_power_flow_tensors
+from mlpf.data.conversion.torch.power_flow import ppc2power_flow_tensors
 from mlpf.data.generate.generate_uniform_data import generate_uniform_ppcs
 from mlpf.data.utils.pandapower_networks import get_all_pandapower_networks
 from mlpf.enumerations.gencost_table import GeneratorCostTableIds
 from mlpf.loss.numpy.bound_errors import upper_bound_errors, lower_bound_errors
-from mlpf.loss.numpy.costs import polynomial_costs
+from mlpf.loss.numpy.costs import polynomial_costs as polynomial_costs_numpy
+from mlpf.loss.torch.costs import polynomial_costs as polynomial_costs_torch
 
 
-def get_bound_errors(ppc):
+def get_bound_errors_numpy(ppc):
     edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances = ppc2power_flow_arrays(ppc)
     voltages_min, voltages_max, active_powers_min, active_powers_max, reactive_powers_min, reactive_powers_max, active_power_demands, reactive_power_demands, cost_coefficients = ppc2optimal_power_flow_arrays(
         ppc)
@@ -41,7 +45,7 @@ def get_bound_errors(ppc):
                   reactive_lower_errors)
 
 
-def get_cost_difference(ppc):
+def get_cost_difference_numpy(ppc):
     edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances = ppc2power_flow_arrays(ppc)
     voltages_min, voltages_max, active_powers_min, active_powers_max, reactive_powers_min, reactive_powers_max, active_power_demands, reactive_power_demands, cost_coefficients = ppc2optimal_power_flow_arrays(
         ppc)
@@ -50,11 +54,27 @@ def get_cost_difference(ppc):
 
     active_powers_generation = (active_powers + active_power_demands) * baseMVA
 
-    active_power_costs = polynomial_costs(active_powers_generation, cost_coefficients)
+    active_power_costs = polynomial_costs_numpy(active_powers_generation, cost_coefficients)
 
     total_costs = np.sum(active_power_costs)
 
     return np.abs(total_costs - ppc['f'])
+
+
+def get_cost_difference_torch(ppc):
+    edge_index, active_powers, reactive_powers, voltages, angles_rad, conductances, susceptances = ppc2power_flow_tensors(ppc, dtype=torch.float64)
+    voltages_min, voltages_max, active_powers_min, active_powers_max, reactive_powers_min, reactive_powers_max, active_power_demands, reactive_power_demands, cost_coefficients = ppc2optimal_power_flow_tensors(
+        ppc, dtype=torch.float64)
+
+    baseMVA = ppc["baseMVA"]
+
+    active_powers_generation = (active_powers + active_power_demands) * baseMVA
+
+    active_power_costs = polynomial_costs_torch(active_powers_generation, cost_coefficients)
+
+    total_costs = torch.sum(active_power_costs)
+
+    return torch.abs(total_costs - ppc['f'])
 
 
 class TestOptimalPowerFlowLoss(unittest.TestCase):
@@ -82,8 +102,10 @@ class TestOptimalPowerFlowLoss(unittest.TestCase):
         tolerance = 1e-8
         for ppc in tqdm(ppc_list, ascii=True, desc="Checking costs and bounds"):
             opf_ppc = runopf(ppc, ppopt=ppoption(OUT_ALL=0, VERBOSE=0))
-            self.assertLess(get_cost_difference(opf_ppc), tolerance)
-            self.assertLess(get_bound_errors(opf_ppc), tolerance)
+            self.assertLess(get_cost_difference_numpy(opf_ppc), tolerance)
+            self.assertLess(get_bound_errors_numpy(opf_ppc), tolerance)
+
+            self.assertLess(get_cost_difference_torch(opf_ppc), tolerance)
 
     # TODO the PYPOWER opf fails for some reason
     # def test_polynomial_cost_multiple_topologies(self):

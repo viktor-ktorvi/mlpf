@@ -26,6 +26,19 @@ def load_pickle_ppc(filepath: str) -> Dict:
     return data_sample
 
 
+def load_solved_from_tuple(filepath: str) -> Dict:
+    """
+    Load the solved PPC instance when the pickle file contains a tuple of (unsolved, solved).
+
+    :param filepath:
+    :return: Solved PPC.
+    """
+    with open(filepath, 'rb') as f:
+        unsolved_solved_tuple = pickle.load(f)
+
+    return unsolved_solved_tuple[1]
+
+
 def load_data(path: str,
               extension: str = ".p",
               load_sample_function: Callable = load_pickle_ppc,

@@ -16,8 +16,8 @@ Visualize the generation capabilities of the grid(looking only at a single ppc).
 
 
 def main():
-    ppc = load_data("opf_ppcs", max_samples=1, load_sample_function=load_solved_from_tuple)[0]
-    # ppc = load_data("solved_opf_ppcs", max_samples=1)[0]
+    # ppc = load_data("opf_ppcs", max_samples=1, load_sample_function=load_solved_from_tuple)[0]
+    ppc = load_data("solved_opf_ppcs_case118_10k", max_samples=1)[0]
 
     generator_bus_numbers = ppc["gen"][:, GeneratorTableIds.bus_number].astype(int)
     bus_types = ppc["bus"][:, BusTableIds.bus_type]

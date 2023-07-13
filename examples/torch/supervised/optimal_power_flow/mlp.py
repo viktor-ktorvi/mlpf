@@ -9,8 +9,11 @@ from torchmetrics import MetricCollection, MeanSquaredError, R2Score
 from tqdm import tqdm
 
 from mlpf.data.data.optimal_power_flow import optimal_power_flow_data
-from mlpf.data.loading.load_data import load_data
+from mlpf.data.loading.load_data import load_data, load_solved_from_tuple
 from mlpf.loss.torch.metrics.active import MeanActivePowerError, MeanRelativeActivePowerError
+from mlpf.loss.torch.metrics.bounds.active import MeanUpperActivePowerError, MeanLowerActivePowerError
+from mlpf.loss.torch.metrics.bounds.reactive import MeanUpperReactivePowerError, MeanLowerReactivePowerError
+from mlpf.loss.torch.metrics.bounds.voltage import MeanUpperVoltageError, MeanLowerVoltageError
 from mlpf.loss.torch.metrics.costs import MeanActivePowerCost, MeanRelativeActivePowerCost
 from mlpf.loss.torch.metrics.reactive import MeanReactivePowerError, MeanRelativeReactivePowerError
 from mlpf.utils.standard_scaler import StandardScaler
@@ -27,7 +30,8 @@ def main():
     batch_size = 1024
     learning_rate = 3e-3
 
-    solved_ppc_list = load_data("solved_opf_ppcs_case30_10k", max_samples=3000)
+    # solved_ppc_list = load_data("opf_ppcs", max_samples=3000, load_sample_function=load_solved_from_tuple)
+    solved_ppc_list = load_data("solved_opf_ppcs_case118_10k", max_samples=3000)
 
     # ppc -> Data
     opf_data_list = []
@@ -70,7 +74,13 @@ def main():
         MeanReactivePowerError(),
         MeanRelativeReactivePowerError(),
         MeanActivePowerCost(),
-        MeanRelativeActivePowerCost()
+        MeanRelativeActivePowerCost(),
+        MeanUpperVoltageError(),
+        MeanLowerVoltageError(),
+        MeanUpperActivePowerError(),
+        MeanLowerActivePowerError(),
+        MeanUpperReactivePowerError(),
+        MeanLowerReactivePowerError()
     ).to(device)
 
     metrics_val = MetricCollection(
@@ -81,7 +91,13 @@ def main():
         MeanReactivePowerError(),
         MeanRelativeReactivePowerError(),
         MeanActivePowerCost(),
-        MeanRelativeActivePowerCost()
+        MeanRelativeActivePowerCost(),
+        MeanUpperVoltageError(),
+        MeanLowerVoltageError(),
+        MeanUpperActivePowerError(),
+        MeanLowerActivePowerError(),
+        MeanUpperReactivePowerError(),
+        MeanLowerReactivePowerError()
     ).to(device)
 
     progress_bar = tqdm(range(num_epochs), ascii=True, desc="Training | Validation:")

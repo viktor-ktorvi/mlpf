@@ -3,14 +3,16 @@ import random
 import numpy as np
 import pandas as pd
 
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, BayesianRidge, Ridge
 from sklearn.model_selection import train_test_split
+from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 from mlpf.data.data.optimal_power_flow import optimal_power_flow_data
-from mlpf.data.loading.load_data import load_data
+from mlpf.data.loading.load_data import load_data, load_solved_from_tuple
+from mlpf.enumerations.optimal_power_flow_ids import OptimalPowerFlowFeatureIds
 from mlpf.loss.numpy.metrics.active import ActivePowerError, RelativeActivePowerError
 from mlpf.loss.numpy.metrics.bounds.active import UpperActivePowerError, LowerActivePowerError
 from mlpf.loss.numpy.metrics.bounds.reactive import UpperReactivePowerError, LowerReactivePowerError
@@ -25,6 +27,7 @@ def main():
     np.random.seed(123)
     random.seed(123)
 
+    # ppc_list = load_data("opf_ppcs", max_samples=10000, load_sample_function=load_solved_from_tuple)
     ppc_list = load_data("solved_opf_ppcs_case118_10k", max_samples=10000)
 
     # ppc -> Data
@@ -42,10 +45,10 @@ def main():
 
     # Model
 
-    backbone = LinearRegression()
+    # backbone = LinearRegression()
     # backbone = MultiOutputRegressor(HuberRegressor())
     # backbone = MultiOutputRegressor(BayesianRidge())
-
+    backbone = Ridge()
     model = make_pipeline(StandardScaler(), backbone)
     model.fit(features_train, targets_train)
 
